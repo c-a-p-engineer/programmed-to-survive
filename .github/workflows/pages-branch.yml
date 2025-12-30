@@ -16,6 +16,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Build
+        run: ./scripts/build.sh
+
       - name: Define SAFE_BRANCH
         shell: bash
         run: |
@@ -31,12 +34,8 @@ jobs:
             echo "public/index.html not found" >&2
             exit 1
           fi
-          if ! grep -qi "phaser" public/index.html; then
-            echo "public/index.html does not contain 'phaser'" >&2
-            exit 1
-          fi
-          if [ ! -f public/assets/.keep ]; then
-            echo "public/assets/.keep not found" >&2
+          if [ ! -f public/assets/main.js ]; then
+            echo "public/assets/main.js not found" >&2
             exit 1
           fi
           python -m http.server 8000 --directory public >/tmp/http.log 2>&1 &
