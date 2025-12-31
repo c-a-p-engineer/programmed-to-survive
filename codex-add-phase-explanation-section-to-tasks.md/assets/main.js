@@ -2,20 +2,38 @@
   class CombatScene extends Phaser.Scene {
     constructor() {
       super("combat");
-      this.state = "settings";
+      this.state = "start";
       this.player = null;
       this.enemy = null;
       this.obstacles = null;
-      this.playerStats = { maxHp: 120, hp: 120, damage: 12, cooldown: 320 };
+      this.playerStats = { maxHp: 120, hp: 120, damage: 12, cooldown: 320, speed: 240 };
       this.enemyStats = { maxHp: 80, hp: 80, damage: 8, cooldown: 420 };
       this.score = 0;
       this.wave = 1;
       this.maxWaves = 3;
-      this.difficultyIndex = 0;
-      this.difficulties = [
-        { label: "EASY", enemyHp: 0.9, enemyDamage: 0.8, score: 0.8 },
-        { label: "NORMAL", enemyHp: 1, enemyDamage: 1, score: 1 },
-        { label: "HARD", enemyHp: 1.2, enemyDamage: 1.2, score: 1.3 },
+      this.shipIndex = 0;
+      this.weaponMainIndex = 0;
+      this.weaponSubIndex = 0;
+      this.aiIndex = 0;
+      this.ships = [
+        { label: "Scout", hp: 90, speed: 270 },
+        { label: "Balanced", hp: 120, speed: 240 },
+        { label: "Guardian", hp: 150, speed: 220 },
+      ];
+      this.weaponsMain = [
+        { label: "Pulse", damage: 12, cooldown: 320 },
+        { label: "Blaster", damage: 16, cooldown: 420 },
+        { label: "Needle", damage: 8, cooldown: 240 },
+      ];
+      this.weaponsSub = [
+        { label: "Shield", scoreBonus: 0.9 },
+        { label: "Booster", scoreBonus: 1.1 },
+        { label: "Scanner", scoreBonus: 1.3 },
+      ];
+      this.aiTypes = [
+        { label: "Aggressive", enemySpeed: 1.1 },
+        { label: "Tactical", enemySpeed: 1 },
+        { label: "Cautious", enemySpeed: 0.9 },
       ];
       this.nextPlayerAttack = 0;
       this.nextEnemyAttack = 0;
@@ -25,9 +43,13 @@
       this.enemyHpText = null;
       this.waveText = null;
       this.scoreText = null;
-      this.difficultyText = null;
-      this.settingsHintText = null;
+      this.shipText = null;
+      this.weaponMainText = null;
+      this.weaponSubText = null;
+      this.aiText = null;
+      this.startButton = null;
       this.resultText = null;
+      this.retryButton = null;
     }
 
     create() {
@@ -74,23 +96,62 @@
       });
 
       this.statusText = this.add
-        .text(width / 2, height / 2 - 40, "設定を選んで開始", {
+        .text(width / 2, height / 2 - 120, "START", {
           fontFamily: "'Noto Sans JP', sans-serif",
-          fontSize: "20px",
+          fontSize: "22px",
           color: "#fef3c7",
         })
         .setOrigin(0.5);
 
-      this.difficultyText = this.add
-        .text(width / 2, height / 2 + 8, "難易度: NORMAL", {
+      this.shipText = this.add
+        .text(width / 2, height / 2 - 70, "機体: --", {
           fontFamily: "'Noto Sans JP', sans-serif",
           fontSize: "16px",
           color: "#93c5fd",
         })
-        .setOrigin(0.5);
+        .setOrigin(0.5)
+        .setInteractive({ useHandCursor: true });
 
-      this.settingsHintText = this.add
-        .text(width / 2, height / 2 + 40, "クリックで難易度変更 / 右クリックで開始", {
+      this.weaponMainText = this.add
+        .text(width / 2, height / 2 - 40, "メイン武器: --", {
+          fontFamily: "'Noto Sans JP', sans-serif",
+          fontSize: "16px",
+          color: "#a5b4fc",
+        })
+        .setOrigin(0.5)
+        .setInteractive({ useHandCursor: true });
+
+      this.weaponSubText = this.add
+        .text(width / 2, height / 2 - 10, "サブ武器: --", {
+          fontFamily: "'Noto Sans JP', sans-serif",
+          fontSize: "16px",
+          color: "#a5b4fc",
+        })
+        .setOrigin(0.5)
+        .setInteractive({ useHandCursor: true });
+
+      this.aiText = this.add
+        .text(width / 2, height / 2 + 20, "AI性格: --", {
+          fontFamily: "'Noto Sans JP', sans-serif",
+          fontSize: "16px",
+          color: "#93c5fd",
+        })
+        .setOrigin(0.5)
+        .setInteractive({ useHandCursor: true });
+
+      this.startButton = this.add
+        .text(width / 2, height / 2 + 70, "バトルスタート", {
+          fontFamily: "'Noto Sans JP', sans-serif",
+          fontSize: "18px",
+          color: "#fef08a",
+          backgroundColor: "#1f2937",
+          padding: { left: 12, right: 12, top: 6, bottom: 6 },
+        })
+        .setOrigin(0.5)
+        .setInteractive({ useHandCursor: true });
+
+      this.add
+        .text(width / 2, height / 2 + 110, "選択項目をクリックで切替", {
           fontFamily: "'Noto Sans JP', sans-serif",
           fontSize: "12px",
           color: "#cbd5f5",
@@ -112,23 +173,36 @@
         }
       });
 
-      this.input.on("pointerdown", (pointer) => {
-        if (this.state === "settings") {
-          if (pointer.rightButtonDown()) {
-            this.startBattle();
-          } else {
-            this.cycleDifficulty();
-          }
-          return;
+      this.shipText.on("pointerdown", () => this.cycleShip());
+      this.weaponMainText.on("pointerdown", () => this.cycleWeaponMain());
+      this.weaponSubText.on("pointerdown", () => this.cycleWeaponSub());
+      this.aiText.on("pointerdown", () => this.cycleAi());
+      this.startButton.on("pointerdown", () => {
+        if (this.state === "start") {
+          this.startBattle();
         }
+      });
 
+      this.retryButton = this.add
+        .text(width / 2, height / 2 + 150, "リトライ", {
+          fontFamily: "'Noto Sans JP', sans-serif",
+          fontSize: "18px",
+          color: "#fde68a",
+          backgroundColor: "#1f2937",
+          padding: { left: 12, right: 12, top: 6, bottom: 6 },
+        })
+        .setOrigin(0.5)
+        .setInteractive({ useHandCursor: true })
+        .setVisible(false);
+
+      this.retryButton.on("pointerdown", () => {
         if (this.state === "result") {
-          this.toSettings();
+          this.toStart();
         }
       });
 
       this.target.set(width / 2, height * 0.7);
-      this.toSettings();
+      this.toStart();
     }
 
     createTextures() {
@@ -149,44 +223,88 @@
       graphics.destroy();
     }
 
-    cycleDifficulty() {
-      this.difficultyIndex = (this.difficultyIndex + 1) % this.difficulties.length;
-      const difficulty = this.difficulties[this.difficultyIndex];
-      this.difficultyText?.setText(`難易度: ${difficulty.label}`);
+    cycleShip() {
+      this.shipIndex = (this.shipIndex + 1) % this.ships.length;
+      this.updateLoadoutText();
     }
 
-    toSettings() {
-      this.state = "settings";
+    cycleWeaponMain() {
+      this.weaponMainIndex = (this.weaponMainIndex + 1) % this.weaponsMain.length;
+      this.updateLoadoutText();
+    }
+
+    cycleWeaponSub() {
+      this.weaponSubIndex = (this.weaponSubIndex + 1) % this.weaponsSub.length;
+      this.updateLoadoutText();
+    }
+
+    cycleAi() {
+      this.aiIndex = (this.aiIndex + 1) % this.aiTypes.length;
+      this.updateLoadoutText();
+    }
+
+    updateLoadoutText() {
+      const ship = this.ships[this.shipIndex];
+      const weaponMain = this.weaponsMain[this.weaponMainIndex];
+      const weaponSub = this.weaponsSub[this.weaponSubIndex];
+      const aiType = this.aiTypes[this.aiIndex];
+      this.shipText?.setText(`機体: ${ship.label}`);
+      this.weaponMainText?.setText(`メイン武器: ${weaponMain.label}`);
+      this.weaponSubText?.setText(`サブ武器: ${weaponSub.label}`);
+      this.aiText?.setText(`AI性格: ${aiType.label}`);
+    }
+
+    applyLoadout() {
+      const ship = this.ships[this.shipIndex];
+      const weaponMain = this.weaponsMain[this.weaponMainIndex];
+      this.playerStats.maxHp = ship.hp;
+      this.playerStats.hp = ship.hp;
+      this.playerStats.speed = ship.speed;
+      this.playerStats.damage = weaponMain.damage;
+      this.playerStats.cooldown = weaponMain.cooldown;
+    }
+
+    toStart() {
+      this.state = "start";
       this.score = 0;
       this.wave = 1;
       this.player.setActive(false).setVisible(false);
       this.enemy.setActive(false).setVisible(false);
       this.clearObstacles();
       this.updateHud();
-      this.statusText.setText("設定を選んで開始");
-      this.difficultyText.setVisible(true);
-      this.settingsHintText.setVisible(true);
+      this.statusText.setText("START");
+      this.shipText.setVisible(true);
+      this.weaponMainText.setVisible(true);
+      this.weaponSubText.setVisible(true);
+      this.aiText.setVisible(true);
+      this.startButton.setVisible(true);
       this.resultText.setVisible(false);
+      this.retryButton.setVisible(false);
       this.target.set(this.scale.width / 2, this.scale.height * 0.7);
+      this.updateLoadoutText();
     }
 
     startBattle() {
       this.state = "playing";
       this.score = 0;
       this.wave = 1;
-      this.difficultyText.setVisible(false);
-      this.settingsHintText.setVisible(false);
+      this.shipText.setVisible(false);
+      this.weaponMainText.setVisible(false);
+      this.weaponSubText.setVisible(false);
+      this.aiText.setVisible(false);
+      this.startButton.setVisible(false);
       this.resultText.setVisible(false);
+      this.retryButton.setVisible(false);
+      this.applyLoadout();
       this.setupWave();
     }
 
     setupWave() {
       const { width, height } = this.scale;
-      const difficulty = this.difficulties[this.difficultyIndex];
       this.playerStats.hp = this.playerStats.maxHp;
-      this.enemyStats.maxHp = Math.round(80 + this.wave * 20 * difficulty.enemyHp);
+      this.enemyStats.maxHp = Math.round(80 + this.wave * 20);
       this.enemyStats.hp = this.enemyStats.maxHp;
-      this.enemyStats.damage = Math.round((8 + this.wave * 2) * difficulty.enemyDamage);
+      this.enemyStats.damage = Math.round(8 + this.wave * 2);
       this.nextPlayerAttack = 0;
       this.nextEnemyAttack = 0;
 
@@ -257,8 +375,8 @@
     }
 
     finishWave() {
-      const difficulty = this.difficulties[this.difficultyIndex];
-      const waveScore = Math.round(150 * this.wave * difficulty.score);
+      const weaponSub = this.weaponsSub[this.weaponSubIndex];
+      const waveScore = Math.round(150 * this.wave * weaponSub.scoreBonus);
       this.score += waveScore;
       this.updateHud();
       if (this.wave >= this.maxWaves) {
@@ -286,6 +404,7 @@
         this.resultText.setText(`最終スコア: ${this.score}（クリックで再挑戦）`);
       }
       this.resultText.setVisible(true);
+      this.retryButton.setVisible(true);
     }
 
     update(time) {
@@ -293,7 +412,7 @@
         return;
       }
 
-      const speed = 240;
+      const speed = this.playerStats.speed;
       const dx = this.target.x - this.player.x;
       const dy = this.target.y - this.player.y;
       const distance = Math.hypot(dx, dy);
@@ -305,7 +424,8 @@
         this.player.setVelocity(0, 0);
       }
 
-      const enemySpeed = 150 + this.wave * 10;
+      const aiType = this.aiTypes[this.aiIndex];
+      const enemySpeed = (150 + this.wave * 10) * aiType.enemySpeed;
       const ex = this.player.x - this.enemy.x;
       const ey = this.player.y - this.enemy.y;
       const enemyDist = Math.hypot(ex, ey);
