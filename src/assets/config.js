@@ -44,9 +44,9 @@ window.PTS_CONFIG = {
       { label: "Needle", damage: 8, cooldown: 240 },
     ],
     weaponsSub: [
-      { label: "Shield", scoreBonus: 0.9 },
-      { label: "Booster", scoreBonus: 1.1 },
-      { label: "Scanner", scoreBonus: 1.3 },
+      { label: "Shield", scoreBonus: 0.9, damage: 6, cooldown: 900 },
+      { label: "Booster", scoreBonus: 1.1, damage: 8, cooldown: 700 },
+      { label: "Scanner", scoreBonus: 1.3, damage: 10, cooldown: 600 },
     ],
     aiTypes: [
       { label: "Aggressive", enemySpeed: 1.1 },
