@@ -28,6 +28,7 @@
       this.weaponSubText = null;
       this.aiText = null;
       this.startButton = null;
+      this.startUiElements = [];
       this.resultText = null;
       this.retryButton = null;
     }
@@ -83,52 +84,67 @@
         })
         .setOrigin(0.5);
 
-      this.shipText = this.add
-        .text(width / 2, height / 2 - 70, "機体: --", {
-          fontFamily: "'Noto Sans JP', sans-serif",
-          fontSize: "16px",
-          color: "#93c5fd",
-        })
-        .setOrigin(0.5)
-        .setInteractive({ useHandCursor: true });
+      const optionWidth = Math.min(300, width * 0.78);
+      const optionHeight = 32;
+      const optionGap = 36;
+      const optionX = width / 2;
+      const optionY = height / 2 - 70;
+      const shipOption = this.createOptionButton(
+        optionX,
+        optionY,
+        "機体: --",
+        () => this.cycleShip(),
+        optionWidth,
+        optionHeight,
+      );
+      const mainOption = this.createOptionButton(
+        optionX,
+        optionY + optionGap,
+        "メイン武器: --",
+        () => this.cycleWeaponMain(),
+        optionWidth,
+        optionHeight,
+      );
+      const subOption = this.createOptionButton(
+        optionX,
+        optionY + optionGap * 2,
+        "サブ武器: --",
+        () => this.cycleWeaponSub(),
+        optionWidth,
+        optionHeight,
+      );
+      const aiOption = this.createOptionButton(
+        optionX,
+        optionY + optionGap * 3,
+        "AI性格: --",
+        () => this.cycleAi(),
+        optionWidth,
+        optionHeight,
+      );
+      this.shipText = shipOption.text;
+      this.weaponMainText = mainOption.text;
+      this.weaponSubText = subOption.text;
+      this.aiText = aiOption.text;
+      this.startUiElements.push(
+        shipOption.container,
+        mainOption.container,
+        subOption.container,
+        aiOption.container,
+      );
 
-      this.weaponMainText = this.add
-        .text(width / 2, height / 2 - 40, "メイン武器: --", {
-          fontFamily: "'Noto Sans JP', sans-serif",
-          fontSize: "16px",
-          color: "#a5b4fc",
-        })
-        .setOrigin(0.5)
-        .setInteractive({ useHandCursor: true });
-
-      this.weaponSubText = this.add
-        .text(width / 2, height / 2 - 10, "サブ武器: --", {
-          fontFamily: "'Noto Sans JP', sans-serif",
-          fontSize: "16px",
-          color: "#a5b4fc",
-        })
-        .setOrigin(0.5)
-        .setInteractive({ useHandCursor: true });
-
-      this.aiText = this.add
-        .text(width / 2, height / 2 + 20, "AI性格: --", {
-          fontFamily: "'Noto Sans JP', sans-serif",
-          fontSize: "16px",
-          color: "#93c5fd",
-        })
-        .setOrigin(0.5)
-        .setInteractive({ useHandCursor: true });
-
-      this.startButton = this.add
-        .text(width / 2, height / 2 + 70, this.config.ui.startButton, {
-          fontFamily: "'Noto Sans JP', sans-serif",
-          fontSize: "18px",
-          color: "#fef08a",
-          backgroundColor: "#1f2937",
-          padding: { left: 12, right: 12, top: 6, bottom: 6 },
-        })
-        .setOrigin(0.5)
-        .setInteractive({ useHandCursor: true });
+      const startButton = this.createActionButton(
+        width / 2,
+        height / 2 + 70,
+        this.config.ui.startButton,
+        () => {
+          if (this.state === "start") {
+            this.startBattle();
+          }
+        },
+        Math.min(240, width * 0.6),
+      );
+      this.startButton = startButton.text;
+      this.startUiElements.push(startButton.container);
 
       this.add
         .text(width / 2, height / 2 + 110, this.config.ui.startHint, {
@@ -159,18 +175,15 @@
         .setInteractive({ useHandCursor: true })
         .setVisible(false);
 
-      this.shipText.on("pointerdown", () => this.cycleShip());
-      this.weaponMainText.on("pointerdown", () => this.cycleWeaponMain());
-      this.weaponSubText.on("pointerdown", () => this.cycleWeaponSub());
-      this.aiText.on("pointerdown", () => this.cycleAi());
-      this.startButton.on("pointerdown", () => {
-        if (this.state === "start") {
-          this.startBattle();
-        }
-      });
       this.retryButton.on("pointerdown", () => {
         if (this.state === "result") {
           this.toStart();
+        }
+      });
+
+      this.input.on("pointerdown", (pointer) => {
+        if (this.state === "playing") {
+          this.target.set(pointer.x, pointer.y);
         }
       });
 
@@ -201,6 +214,48 @@
       graphics.fillRoundedRect(0, 0, obstacle.width, obstacle.height, obstacle.radius);
       graphics.generateTexture("obstacle", obstacle.width, obstacle.height);
       graphics.destroy();
+    }
+
+    createOptionButton(x, y, label, onTap, width, height) {
+      const container = this.add.container(x, y);
+      const background = this.add
+        .rectangle(0, 0, width, height, 0x1f2937, 0.6)
+        .setStrokeStyle(1, 0x475569, 0.6);
+      const text = this.add.text(0, 0, label, {
+        fontFamily: "'Noto Sans JP', sans-serif",
+        fontSize: "16px",
+        color: "#c7d2fe",
+      });
+      text.setOrigin(0.5);
+      container.add([background, text]);
+      container.setSize(width, height);
+      container.setInteractive(
+        new Phaser.Geom.Rectangle(-width / 2, -height / 2, width, height),
+        Phaser.Geom.Rectangle.Contains,
+      );
+      container.on("pointerdown", onTap);
+      return { container, text };
+    }
+
+    createActionButton(x, y, label, onTap, width) {
+      const container = this.add.container(x, y);
+      const background = this.add
+        .rectangle(0, 0, width, 36, 0x1f2937, 0.9)
+        .setStrokeStyle(1, 0xfde68a, 0.7);
+      const text = this.add.text(0, 0, label, {
+        fontFamily: "'Noto Sans JP', sans-serif",
+        fontSize: "18px",
+        color: "#fef08a",
+      });
+      text.setOrigin(0.5);
+      container.add([background, text]);
+      container.setSize(width, 36);
+      container.setInteractive(
+        new Phaser.Geom.Rectangle(-width / 2, -18, width, 36),
+        Phaser.Geom.Rectangle.Contains,
+      );
+      container.on("pointerdown", onTap);
+      return { container, text };
     }
 
     cycleShip() {
@@ -253,11 +308,7 @@
       this.clearObstacles();
       this.updateHud();
       this.statusText.setText(this.config.ui.startHeadline);
-      this.shipText.setVisible(true);
-      this.weaponMainText.setVisible(true);
-      this.weaponSubText.setVisible(true);
-      this.aiText.setVisible(true);
-      this.startButton.setVisible(true);
+      this.startUiElements.forEach((element) => element.setVisible(true));
       this.resultText.setVisible(false);
       this.retryButton.setVisible(false);
       this.target.set(this.scale.width / 2, this.scale.height * 0.7);
@@ -268,11 +319,7 @@
       this.state = "playing";
       this.score = 0;
       this.wave = 1;
-      this.shipText.setVisible(false);
-      this.weaponMainText.setVisible(false);
-      this.weaponSubText.setVisible(false);
-      this.aiText.setVisible(false);
-      this.startButton.setVisible(false);
+      this.startUiElements.forEach((element) => element.setVisible(false));
       this.resultText.setVisible(false);
       this.retryButton.setVisible(false);
       this.applyLoadout();

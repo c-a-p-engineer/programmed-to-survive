@@ -16,10 +16,11 @@ body {
   align-items: center;
   justify-content: center;
   background: radial-gradient(circle at top, #2d3447, #0b0d12 70%);
+  padding: 12px;
 }
 
 #app {
-  width: min(920px, 92vw);
+  width: min(920px, 96vw);
   display: grid;
   gap: 16px;
 }
@@ -52,8 +53,44 @@ body {
 .tips {
   display: flex;
   justify-content: space-between;
+  gap: 12px;
   font-size: 0.85rem;
   color: #b3bdd3;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 720px) {
+  #app {
+    width: min(680px, 100%);
+    gap: 12px;
+  }
+
+  .hud h1 {
+    font-size: 1.15rem;
+  }
+
+  .hud p {
+    font-size: 0.9rem;
+  }
+
+  #game {
+    height: min(520px, 62vh);
+  }
+}
+
+@media (orientation: landscape) {
+  body {
+    padding: 8px;
+  }
+
+  #app {
+    width: min(1100px, 98vw);
+    gap: 10px;
+  }
+
+  #game {
+    height: min(480px, 60vh);
+  }
 }
 
 @media (max-width: 600px) {
