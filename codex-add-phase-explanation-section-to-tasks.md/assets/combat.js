@@ -9,6 +9,7 @@
       this.obstacles = null;
       this.playerStats = { maxHp: 120, hp: 120, damage: 12, cooldown: 320, speed: 240 };
       this.enemyStats = { maxHp: 80, hp: 80, damage: 8, cooldown: 420 };
+      this.subWeaponStats = { damage: 6, cooldown: 900 };
       this.score = 0;
       this.wave = 1;
       this.shipIndex = 0;
@@ -17,6 +18,7 @@
       this.aiIndex = 0;
       this.nextPlayerAttack = 0;
       this.nextEnemyAttack = 0;
+      this.nextSubAttack = 0;
       this.target = new Phaser.Math.Vector2(0, 0);
       this.statusText = null;
       this.playerHpText = null;
@@ -292,11 +294,14 @@
     applyLoadout() {
       const ship = this.config.loadouts.ships[this.shipIndex];
       const weaponMain = this.config.loadouts.weaponsMain[this.weaponMainIndex];
+      const weaponSub = this.config.loadouts.weaponsSub[this.weaponSubIndex];
       this.playerStats.maxHp = ship.hp;
       this.playerStats.hp = ship.hp;
       this.playerStats.speed = ship.speed;
       this.playerStats.damage = weaponMain.damage;
       this.playerStats.cooldown = weaponMain.cooldown;
+      this.subWeaponStats.damage = weaponSub.damage;
+      this.subWeaponStats.cooldown = weaponSub.cooldown;
     }
 
     toStart() {
@@ -337,6 +342,7 @@
       );
       this.nextPlayerAttack = 0;
       this.nextEnemyAttack = 0;
+      this.nextSubAttack = 0;
 
       this.player.setPosition(width / 2, height * 0.7).setActive(true).setVisible(true);
       this.enemy.setPosition(width / 2, height * 0.3).setActive(true).setVisible(true);
@@ -390,6 +396,10 @@
       if (now >= this.nextPlayerAttack) {
         this.enemyStats.hp = Math.max(0, this.enemyStats.hp - this.playerStats.damage);
         this.nextPlayerAttack = now + this.playerStats.cooldown;
+      }
+      if (now >= this.nextSubAttack) {
+        this.enemyStats.hp = Math.max(0, this.enemyStats.hp - this.subWeaponStats.damage);
+        this.nextSubAttack = now + this.subWeaponStats.cooldown;
       }
       if (now >= this.nextEnemyAttack) {
         this.playerStats.hp = Math.max(0, this.playerStats.hp - this.enemyStats.damage);
