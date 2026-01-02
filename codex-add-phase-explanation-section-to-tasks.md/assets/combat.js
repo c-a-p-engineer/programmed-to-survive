@@ -16,23 +16,19 @@
       this.weaponMainIndex = 0;
       this.weaponSubIndex = 0;
       this.aiIndex = 0;
-      this.themeIndex = 0;
       this.nextPlayerAttack = 0;
       this.nextEnemyAttack = 0;
       this.nextSubAttack = 0;
       this.target = new Phaser.Math.Vector2(0, 0);
       this.backgroundRect = null;
-      this.titleText = null;
+      this.headerBar = null;
+      this.headerTitle = null;
+      this.headerTag = null;
       this.statusText = null;
-      this.playerHpText = null;
-      this.enemyHpText = null;
-      this.waveText = null;
-      this.scoreText = null;
       this.shipText = null;
       this.weaponMainText = null;
       this.weaponSubText = null;
       this.aiText = null;
-      this.themeText = null;
       this.startButton = null;
       this.startButtonContainer = null;
       this.startHintText = null;
@@ -41,6 +37,21 @@
       this.themePanels = [];
       this.resultText = null;
       this.retryButton = null;
+      this.randomButton = null;
+      this.randomButtonContainer = null;
+      this.debugBar = null;
+      this.debugText = null;
+      this.hudPanel = null;
+      this.hudHpPlayer = null;
+      this.hudHpEnemy = null;
+      this.hudWaveTime = null;
+      this.hudScore = null;
+      this.hudLoadout = null;
+      this.hudHpBaseWidth = 0;
+      this.logPanel = null;
+      this.logText = null;
+      this.logLines = [];
+      this.battleStartTime = 0;
     }
 
     create() {
@@ -60,41 +71,80 @@
 
       this.obstacles = this.physics.add.staticGroup();
 
-      this.titleText = this.add.text(16, 12, this.config.ui.title, {
+      this.headerBar = this.add
+        .rectangle(width / 2, 26, width - 24, 36, 0x0f172a, 0.95)
+        .setStrokeStyle(1, 0x223240, 0.9);
+      this.headerTitle = this.add.text(28, 16, "PROGRAMMED TO SURVIVE", {
         fontFamily: "'Noto Sans JP', sans-serif",
         fontSize: "14px",
-        color: "#8be3ff",
+        color: "#00f0c8",
+        fontStyle: "600",
       });
+      this.headerTag = this.add.text(width - 28, 16, "prototype / one file", {
+        fontFamily: "'Noto Sans JP', sans-serif",
+        fontSize: "12px",
+        color: "#94a3b8",
+      });
+      this.headerTag.setOrigin(1, 0);
 
-      this.playerHpText = this.add.text(16, 36, "PLAYER HP: --", {
+      this.debugBar = this.add
+        .rectangle(width / 2, 68, width - 24, 32, 0x111827, 0.9)
+        .setStrokeStyle(1, 0x223240, 0.7);
+      this.debugText = this.add.text(width / 2, 60, "DEBUG", {
         fontFamily: "'Noto Sans JP', sans-serif",
-        fontSize: "14px",
-        color: "#a7f3d0",
+        fontSize: "12px",
+        color: "#cbd5f5",
       });
-      this.enemyHpText = this.add.text(width - 180, 36, "ENEMY HP: --", {
-        fontFamily: "'Noto Sans JP', sans-serif",
-        fontSize: "14px",
-        color: "#fca5a5",
-      });
+      this.debugText.setOrigin(0.5, 0);
 
-      this.waveText = this.add.text(16, 58, "WAVE: --", {
+      this.hudPanel = this.add
+        .rectangle(width * 0.34, 120, width * 0.62, 70, 0x0b121a, 0.9)
+        .setStrokeStyle(1, 0x223240, 0.6)
+        .setVisible(false);
+      this.hudWaveTime = this.add.text(width * 0.06, 96, "WAVE 1  TIME 00:00", {
         fontFamily: "'Noto Sans JP', sans-serif",
-        fontSize: "13px",
-        color: "#fcd34d",
+        fontSize: "12px",
+        color: "#e2e8f0",
       });
-      this.scoreText = this.add.text(width - 180, 58, "SCORE: 0", {
+      this.hudWaveTime.setVisible(false);
+      this.hudScore = this.add.text(width * 0.6, 96, "SCORE 0", {
         fontFamily: "'Noto Sans JP', sans-serif",
-        fontSize: "13px",
-        color: "#c4b5fd",
+        fontSize: "18px",
+        color: "#e2e8f0",
       });
+      this.hudScore.setVisible(false);
+      this.hudHpPlayer = this.add
+        .rectangle(width * 0.1, 126, width * 0.26, 10, 0x00f0c8, 1)
+        .setOrigin(0, 0.5)
+        .setVisible(false);
+      this.hudHpEnemy = this.add
+        .rectangle(width * 0.1, 142, width * 0.26, 8, 0xd946ef, 0.9)
+        .setOrigin(0, 0.5)
+        .setVisible(false);
+      this.hudLoadout = this.add.text(width * 0.06, 154, "", {
+        fontFamily: "'Noto Sans JP', sans-serif",
+        fontSize: "11px",
+        color: "#94a3b8",
+      });
+      this.hudLoadout.setVisible(false);
+      this.logPanel = this.add
+        .rectangle(width * 0.74, 200, width * 0.4, 120, 0x0b121a, 0.85)
+        .setStrokeStyle(1, 0x223240, 0.5)
+        .setVisible(false);
+      this.logText = this.add.text(width * 0.58, 152, "", {
+        fontFamily: "'Noto Sans JP', sans-serif",
+        fontSize: "10px",
+        color: "#cbd5f5",
+      });
+      this.logText.setVisible(false);
 
       this.statusText = this.add
         .text(width / 2, height / 2 - 120, this.config.ui.startHeadline, {
           fontFamily: "'Noto Sans JP', sans-serif",
-          fontSize: "22px",
-          color: "#fef3c7",
+          fontSize: "12px",
+          color: "#94a3b8",
         })
-        .setOrigin(0.5);
+        .setOrigin(0, 0);
 
       const optionWidth = Math.min(320, width * 0.8);
       const optionHeight = 32;
@@ -133,28 +183,19 @@
         optionWidth,
         optionHeight,
       );
-      const themeOption = this.createOptionButton(
-        optionX,
-        optionY + optionGap * 4,
-        "UIテーマ: --",
-        () => this.cycleTheme(),
-        optionWidth,
-        optionHeight,
-      );
       this.shipText = shipOption.text;
       this.weaponMainText = mainOption.text;
       this.weaponSubText = subOption.text;
       this.aiText = aiOption.text;
-      this.themeText = themeOption.text;
-      this.startOptions = [shipOption, mainOption, subOption, aiOption, themeOption];
+      this.startOptions = [shipOption, mainOption, subOption, aiOption];
       this.startUiElements.push(
         shipOption.container,
         mainOption.container,
         subOption.container,
         aiOption.container,
-        themeOption.container,
       );
 
+      const actionButtonWidth = Math.min(220, width * 0.4);
       const startButton = this.createActionButton(
         width / 2,
         height / 2 + 70,
@@ -164,19 +205,34 @@
             this.startBattle();
           }
         },
-        Math.min(240, width * 0.6),
+        actionButtonWidth,
       );
       this.startButton = startButton.text;
       this.startButtonContainer = startButton.container;
       this.startUiElements.push(startButton.container);
 
+      const randomButton = this.createActionButton(
+        width / 2,
+        height / 2 + 120,
+        "RANDOM (構成だけ)",
+        () => {
+          if (this.state === "start") {
+            this.randomizeLoadout();
+          }
+        },
+        actionButtonWidth,
+      );
+      this.randomButton = randomButton.text;
+      this.randomButtonContainer = randomButton.container;
+      this.startUiElements.push(randomButton.container);
+
       this.startHintText = this.add
         .text(width / 2, height / 2 + 110, this.config.ui.startHint, {
           fontFamily: "'Noto Sans JP', sans-serif",
-          fontSize: "12px",
+          fontSize: "10px",
           color: "#cbd5f5",
         })
-        .setOrigin(0.5);
+        .setOrigin(0, 0.5);
       this.startUiElements.push(this.startHintText);
 
       this.resultText = this.add
@@ -247,37 +303,43 @@
       const background = this.add
         .rectangle(0, 0, width, height, 0x1f2937, 0.6)
         .setStrokeStyle(1, 0x475569, 0.6);
-      const text = this.add.text(0, 0, label, {
+      const text = this.add.text(-width / 2 + 16, 0, label, {
         fontFamily: "'Noto Sans JP', sans-serif",
-        fontSize: "16px",
+        fontSize: "14px",
         color: "#c7d2fe",
       });
-      text.setOrigin(0.5);
-      container.add([background, text]);
+      text.setOrigin(0, 0.5);
+      const chevron = this.add.text(width / 2 - 18, -1, "▾", {
+        fontFamily: "'Noto Sans JP', sans-serif",
+        fontSize: "14px",
+        color: "#94a3b8",
+      });
+      chevron.setOrigin(0.5);
+      container.add([background, text, chevron]);
       container.setSize(width, height);
       container.setInteractive(
         new Phaser.Geom.Rectangle(-width / 2, -height / 2, width, height),
         Phaser.Geom.Rectangle.Contains,
       );
       container.on("pointerdown", onTap);
-      return { container, text, background };
+      return { container, text, background, chevron };
     }
 
     createActionButton(x, y, label, onTap, width) {
       const container = this.add.container(x, y);
       const background = this.add
-        .rectangle(0, 0, width, 36, 0x1f2937, 0.9)
+        .rectangle(0, 0, width, 40, 0x1f2937, 0.9)
         .setStrokeStyle(1, 0xfde68a, 0.7);
       const text = this.add.text(0, 0, label, {
         fontFamily: "'Noto Sans JP', sans-serif",
-        fontSize: "18px",
+        fontSize: "14px",
         color: "#fef08a",
       });
       text.setOrigin(0.5);
       container.add([background, text]);
-      container.setSize(width, 36);
+      container.setSize(width, 40);
       container.setInteractive(
-        new Phaser.Geom.Rectangle(-width / 2, -18, width, 36),
+        new Phaser.Geom.Rectangle(-width / 2, -20, width, 40),
         Phaser.Geom.Rectangle.Contains,
       );
       container.on("pointerdown", onTap);
@@ -304,23 +366,23 @@
       this.updateLoadoutText();
     }
 
-    cycleTheme() {
-      this.themeIndex = (this.themeIndex + 1) % this.config.uiThemes.length;
-      this.applyTheme();
-      this.updateLoadoutText();
-    }
-
     updateLoadoutText() {
       const ship = this.config.loadouts.ships[this.shipIndex];
       const weaponMain = this.config.loadouts.weaponsMain[this.weaponMainIndex];
       const weaponSub = this.config.loadouts.weaponsSub[this.weaponSubIndex];
       const aiType = this.config.loadouts.aiTypes[this.aiIndex];
-      const theme = this.config.uiThemes[this.themeIndex];
-      this.shipText?.setText(`機体: ${ship.label}`);
-      this.weaponMainText?.setText(`メイン武器: ${weaponMain.label}`);
-      this.weaponSubText?.setText(`サブ武器: ${weaponSub.label}`);
-      this.aiText?.setText(`AI性格: ${aiType.label}`);
-      this.themeText?.setText(`UIテーマ: ${theme.label}`);
+      this.shipText?.setText(`機体  ${ship.label}`);
+      this.weaponMainText?.setText(`武器 (MAIN)  ${weaponMain.label}`);
+      this.weaponSubText?.setText(`武器 (SUB)  ${weaponSub.label}`);
+      this.aiText?.setText(`AI (性格)  ${aiType.label}`);
+    }
+
+    randomizeLoadout() {
+      this.shipIndex = Phaser.Math.Between(0, this.config.loadouts.ships.length - 1);
+      this.weaponMainIndex = Phaser.Math.Between(0, this.config.loadouts.weaponsMain.length - 1);
+      this.weaponSubIndex = Phaser.Math.Between(0, this.config.loadouts.weaponsSub.length - 1);
+      this.aiIndex = Phaser.Math.Between(0, this.config.loadouts.aiTypes.length - 1);
+      this.updateLoadoutText();
     }
 
     toCssColor(value) {
@@ -328,34 +390,49 @@
     }
 
     applyTheme() {
-      const theme = this.config.uiThemes[this.themeIndex];
+      const theme = this.config.uiThemes[0];
       const palette = theme.palette;
       const { width, height } = this.scale;
       this.backgroundRect?.setFillStyle(palette.bg, 1);
 
       const panelCss = this.toCssColor(palette.panel);
 
-      this.titleText?.setColor(palette.accentText);
-      this.statusText?.setColor(palette.text);
-      this.playerHpText?.setColor(palette.accentText);
-      this.enemyHpText?.setColor(palette.highlightText);
-      this.waveText?.setColor(palette.text);
-      this.scoreText?.setColor(palette.subText);
+      this.headerBar?.setFillStyle(palette.panel, 0.95).setStrokeStyle(1, palette.panelBorder, 0.9);
+      this.headerTitle?.setColor(palette.accentText);
+      this.headerTag?.setColor(palette.subText);
+      this.debugBar?.setFillStyle(palette.panel, 0.9).setStrokeStyle(1, palette.panelBorder, 0.6);
+      this.debugText?.setColor(palette.text);
+      this.statusText?.setColor(palette.subText);
+      this.hudPanel?.setFillStyle(palette.panel, 0.7).setStrokeStyle(1, palette.panelBorder, 0.6);
+      this.hudWaveTime?.setColor(palette.text);
+      this.hudScore?.setColor(palette.text);
+      this.hudLoadout?.setColor(palette.subText);
+      this.logPanel?.setFillStyle(palette.panel, 0.6).setStrokeStyle(1, palette.panelBorder, 0.5);
+      this.logText?.setColor(palette.text);
       this.resultText?.setColor(palette.highlightText);
       this.startHintText?.setColor(palette.subText);
       this.retryButton?.setStyle({ color: palette.highlightText, backgroundColor: panelCss });
+      this.hudHpPlayer?.setFillStyle(palette.accent, 1);
+      this.hudHpEnemy?.setFillStyle(0xd946ef, 0.9);
 
       this.startOptions.forEach((option) => {
-        option.background.setFillStyle(palette.panel, 0.7);
+        option.background.setFillStyle(palette.panel, 0.8);
         option.background.setStrokeStyle(1, palette.panelBorder, 0.8);
         option.text.setColor(palette.text);
+        option.chevron.setColor(palette.subText);
       });
 
       if (this.startButtonContainer && this.startButton) {
         const background = this.startButtonContainer.list[0];
         background.setFillStyle(palette.panel, 0.9);
-        background.setStrokeStyle(1, palette.highlight, 0.8);
-        this.startButton.setColor(palette.highlightText);
+        background.setStrokeStyle(1, palette.accent, 0.9);
+        this.startButton.setColor(palette.accentText);
+      }
+      if (this.randomButtonContainer && this.randomButton) {
+        const background = this.randomButtonContainer.list[0];
+        background.setFillStyle(palette.panel, 0.7);
+        background.setStrokeStyle(1, palette.panelBorder, 0.7);
+        this.randomButton.setColor(palette.text);
       }
 
       this.updateLayout(theme.layout, width, height);
@@ -364,101 +441,142 @@
 
     updateLayout(layout, width, height) {
       const layoutConfig = this.getLayoutConfig(layout, width, height);
-      if (this.titleText) {
-        if (layoutConfig.title.originX !== undefined) {
-          this.titleText.setOrigin(layoutConfig.title.originX, 0);
-        }
-        this.titleText.setPosition(layoutConfig.title.x, layoutConfig.title.y);
+      this.headerBar?.setPosition(layoutConfig.header.x, layoutConfig.header.y);
+      this.headerBar?.setSize(layoutConfig.header.width, layoutConfig.header.height);
+      this.headerTitle?.setPosition(layoutConfig.header.titleX, layoutConfig.header.titleY);
+      this.headerTag?.setPosition(layoutConfig.header.tagX, layoutConfig.header.tagY);
+      this.debugBar?.setPosition(layoutConfig.debug.x, layoutConfig.debug.y);
+      this.debugBar?.setSize(layoutConfig.debug.width, layoutConfig.debug.height);
+      this.debugText?.setPosition(layoutConfig.debug.textX, layoutConfig.debug.textY);
+      if (this.statusText) {
+        this.statusText.setPosition(layoutConfig.start.noticeX, layoutConfig.start.noticeY);
+        this.statusText.setWordWrapWidth(layoutConfig.start.noticeWidth);
       }
-      this.statusText?.setPosition(layoutConfig.status.x, layoutConfig.status.y);
-      this.playerHpText?.setPosition(layoutConfig.hud.playerHp.x, layoutConfig.hud.playerHp.y);
-      this.enemyHpText?.setPosition(layoutConfig.hud.enemyHp.x, layoutConfig.hud.enemyHp.y);
-      this.waveText?.setPosition(layoutConfig.hud.wave.x, layoutConfig.hud.wave.y);
-      this.scoreText?.setPosition(layoutConfig.hud.score.x, layoutConfig.hud.score.y);
+      this.hudPanel?.setPosition(layoutConfig.hud.panelX, layoutConfig.hud.panelY);
+      this.hudPanel?.setSize(layoutConfig.hud.panelW, layoutConfig.hud.panelH);
+      this.hudWaveTime?.setPosition(layoutConfig.hud.waveX, layoutConfig.hud.waveY);
+      this.hudScore?.setPosition(layoutConfig.hud.scoreX, layoutConfig.hud.scoreY);
+      this.hudHpPlayer?.setPosition(layoutConfig.hud.hpX, layoutConfig.hud.hpPlayerY);
+      this.hudHpEnemy?.setPosition(layoutConfig.hud.hpX, layoutConfig.hud.hpEnemyY);
+      this.hudHpBaseWidth = layoutConfig.hud.hpWidth;
+      this.hudHpPlayer?.setSize(layoutConfig.hud.hpWidth, 10);
+      this.hudHpEnemy?.setSize(layoutConfig.hud.hpWidth, 8);
+      this.hudLoadout?.setPosition(layoutConfig.hud.loadoutX, layoutConfig.hud.loadoutY);
+      this.logPanel?.setPosition(layoutConfig.log.panelX, layoutConfig.log.panelY);
+      this.logPanel?.setSize(layoutConfig.log.panelW, layoutConfig.log.panelH);
+      this.logText?.setPosition(layoutConfig.log.textX, layoutConfig.log.textY);
 
       this.startOptions.forEach((option, index) => {
-        const y = layoutConfig.start.optionsY + layoutConfig.start.optionGap * index;
-        option.container.setPosition(layoutConfig.start.optionsX, y);
+        const optionLayout = layoutConfig.start.options[index];
+        option.container.setPosition(optionLayout.x, optionLayout.y);
+        option.background.setSize(optionLayout.width, optionLayout.height);
+        option.container.setSize(optionLayout.width, optionLayout.height);
+        option.text.setPosition(-optionLayout.width / 2 + 16, 0);
+        option.chevron.setPosition(optionLayout.width / 2 - 18, -1);
       });
 
       if (this.startButtonContainer) {
         this.startButtonContainer.setPosition(layoutConfig.start.buttonX, layoutConfig.start.buttonY);
       }
+      if (this.randomButtonContainer) {
+        this.randomButtonContainer.setPosition(
+          layoutConfig.start.randomButtonX,
+          layoutConfig.start.randomButtonY,
+        );
+      }
 
       this.startHintText?.setPosition(layoutConfig.start.hintX, layoutConfig.start.hintY);
+      this.startHintText?.setWordWrapWidth(layoutConfig.start.noticeWidth);
       this.resultText?.setPosition(layoutConfig.result.x, layoutConfig.result.y);
       this.retryButton?.setPosition(layoutConfig.retry.x, layoutConfig.retry.y);
     }
 
     getLayoutConfig(layout, width, height) {
-      if (layout === "split") {
-        return {
-          title: { x: width * 0.06, y: 16, originX: 0 },
-          status: { x: width * 0.68, y: height * 0.24 },
-          hud: {
-            playerHp: { x: 16, y: 68 },
-            enemyHp: { x: 16, y: 90 },
-            wave: { x: width - 180, y: 68 },
-            score: { x: width - 180, y: 90 },
-          },
-          start: {
-            optionsX: width * 0.28,
-            optionsY: height * 0.32,
-            optionGap: 34,
-            buttonX: width * 0.28,
-            buttonY: height * 0.62,
-            hintX: width * 0.28,
-            hintY: height * 0.67,
-          },
-          result: { x: width * 0.7, y: height * 0.56 },
-          retry: { x: width * 0.7, y: height * 0.64 },
-        };
-      }
-
-      if (layout === "bottom") {
-        return {
-          title: { x: width * 0.5, y: 16, originX: 0.5 },
-          status: { x: width * 0.5, y: height * 0.2 },
-          hud: {
-            playerHp: { x: 16, y: height - 52 },
-            enemyHp: { x: width - 180, y: height - 52 },
-            wave: { x: width * 0.5 - 40, y: height - 74 },
-            score: { x: width * 0.5 - 40, y: height - 52 },
-          },
-          start: {
-            optionsX: width * 0.5,
-            optionsY: height * 0.46,
-            optionGap: 32,
-            buttonX: width * 0.5,
-            buttonY: height * 0.72,
-            hintX: width * 0.5,
-            hintY: height * 0.77,
-          },
-          result: { x: width * 0.5, y: height * 0.65 },
-          retry: { x: width * 0.5, y: height * 0.73 },
-        };
-      }
+      const panelWidth = Math.min(width - 40, 520);
+      const panelLeft = width / 2 - panelWidth / 2;
+      const optionWidth = panelWidth;
+      const optionHalfWidth = (panelWidth - 16) / 2;
+      const optionHeight = 36;
+      const optionsTop = 140;
+      const optionGap = 18;
 
       return {
-        title: { x: 16, y: 12, originX: 0 },
-        status: { x: width / 2, y: height / 2 - 120 },
-        hud: {
-          playerHp: { x: 16, y: 36 },
-          enemyHp: { x: width - 180, y: 36 },
-          wave: { x: 16, y: 58 },
-          score: { x: width - 180, y: 58 },
+        header: {
+          x: width / 2,
+          y: 26,
+          width: width - 24,
+          height: 36,
+          titleX: panelLeft,
+          titleY: 16,
+          tagX: panelLeft + panelWidth,
+          tagY: 16,
+        },
+        debug: {
+          x: width / 2,
+          y: 68,
+          width: width - 24,
+          height: 32,
+          textX: width / 2,
+          textY: 60,
         },
         start: {
-          optionsX: width / 2,
-          optionsY: height / 2 - 70,
-          optionGap: 36,
-          buttonX: width / 2,
-          buttonY: height / 2 + 70,
-          hintX: width / 2,
-          hintY: height / 2 + 110,
+          noticeX: panelLeft,
+          noticeY: 108,
+          noticeWidth: panelWidth,
+          options: [
+            { x: width / 2, y: optionsTop, width: optionWidth, height: optionHeight },
+            {
+              x: panelLeft + optionHalfWidth / 2,
+              y: optionsTop + optionGap + optionHeight,
+              width: optionHalfWidth,
+              height: optionHeight,
+            },
+            {
+              x: panelLeft + optionHalfWidth + 8 + optionHalfWidth / 2,
+              y: optionsTop + optionGap + optionHeight,
+              width: optionHalfWidth,
+              height: optionHeight,
+            },
+            {
+              x: width / 2,
+              y: optionsTop + (optionGap + optionHeight) * 2,
+              width: optionWidth,
+              height: optionHeight,
+            },
+          ],
+          buttonX: panelLeft + optionWidth * 0.32,
+          buttonY: optionsTop + (optionGap + optionHeight) * 3 + 16,
+          randomButtonX: panelLeft + optionWidth * 0.74,
+          randomButtonY: optionsTop + (optionGap + optionHeight) * 3 + 16,
+          hintX: panelLeft,
+          hintY: optionsTop + (optionGap + optionHeight) * 3 + 58,
         },
-        result: { x: width / 2, y: height / 2 + 110 },
-        retry: { x: width / 2, y: height / 2 + 150 },
+        hud: {
+          panelX: width * 0.36,
+          panelY: 120,
+          panelW: width * 0.66,
+          panelH: 72,
+          waveX: width * 0.06,
+          waveY: 96,
+          scoreX: width * 0.58,
+          scoreY: 92,
+          hpX: width * 0.06,
+          hpWidth: width * 0.3,
+          hpPlayerY: 128,
+          hpEnemyY: 144,
+          loadoutX: width * 0.06,
+          loadoutY: 154,
+        },
+        log: {
+          panelX: width * 0.74,
+          panelY: 200,
+          panelW: width * 0.42,
+          panelH: 130,
+          textX: width * 0.58,
+          textY: 152,
+        },
+        result: { x: width / 2, y: height / 2 + 80 },
+        retry: { x: width / 2, y: height / 2 + 120 },
       };
     }
 
@@ -466,33 +584,11 @@
       this.themePanels.forEach((panel) => panel.destroy());
       this.themePanels = [];
 
-      if (layout === "split") {
-        const leftPanel = this.add
-          .rectangle(width * 0.24, height / 2, width * 0.46, height * 0.86, palette.panel, 0.35)
-          .setStrokeStyle(1, palette.panelBorder, 0.6)
-          .setDepth(-1);
-        const rightPanel = this.add
-          .rectangle(width * 0.72, height / 2, width * 0.48, height * 0.78, palette.panel, 0.2)
-          .setStrokeStyle(1, palette.panelBorder, 0.4)
-          .setDepth(-1);
-        this.themePanels.push(leftPanel, rightPanel);
-        return;
-      }
-
-      if (layout === "bottom") {
-        const bottomPanel = this.add
-          .rectangle(width / 2, height - 48, width - 32, 72, palette.panel, 0.45)
-          .setStrokeStyle(1, palette.panelBorder, 0.5)
-          .setDepth(-1);
-        this.themePanels.push(bottomPanel);
-        return;
-      }
-
-      const topPanel = this.add
-        .rectangle(width / 2, 36, width - 32, 46, palette.panel, 0.35)
-        .setStrokeStyle(1, palette.panelBorder, 0.5)
+      const startPanel = this.add
+        .rectangle(width / 2, 240, Math.min(width - 32, 560), 260, palette.panel, 0.35)
+        .setStrokeStyle(1, palette.panelBorder, 0.6)
         .setDepth(-1);
-      this.themePanels.push(topPanel);
+      this.themePanels.push(startPanel);
     }
 
     applyLoadout() {
@@ -518,6 +614,9 @@
       this.updateHud();
       this.statusText.setText(this.config.ui.startHeadline);
       this.startUiElements.forEach((element) => element.setVisible(true));
+      this.setBattleUiVisible(false);
+      this.logLines = [];
+      this.logText?.setText("");
       this.resultText.setVisible(false);
       this.retryButton.setVisible(false);
       this.target.set(this.scale.width / 2, this.scale.height * 0.7);
@@ -532,6 +631,14 @@
       this.resultText.setVisible(false);
       this.retryButton.setVisible(false);
       this.applyLoadout();
+      this.setBattleUiVisible(true);
+      this.battleStartTime = this.time.now;
+      this.logLines = [];
+      this.appendLog("Battle started");
+      this.hudLoadout?.setText(
+        `${this.config.loadouts.ships[this.shipIndex].label} | ${this.config.loadouts.aiTypes[this.aiIndex].label} | ` +
+          `${this.config.loadouts.weaponsMain[this.weaponMainIndex].label} / ${this.config.loadouts.weaponsSub[this.weaponSubIndex].label}`,
+      );
       this.setupWave();
     }
 
@@ -557,6 +664,7 @@
       this.target.set(width / 2, height * 0.7);
       this.createObstacles();
       this.updateHud();
+      this.appendLog(`WAVE ${this.wave} start`);
     }
 
     createObstacles() {
@@ -583,17 +691,44 @@
       this.obstacles.clear(true, true);
     }
 
+    setBattleUiVisible(isVisible) {
+      this.hudPanel?.setVisible(isVisible);
+      this.hudWaveTime?.setVisible(isVisible);
+      this.hudScore?.setVisible(isVisible);
+      this.hudHpPlayer?.setVisible(isVisible);
+      this.hudHpEnemy?.setVisible(isVisible);
+      this.hudLoadout?.setVisible(isVisible);
+      this.logPanel?.setVisible(isVisible);
+      this.logText?.setVisible(isVisible);
+      this.themePanels.forEach((panel) => panel.setVisible(!isVisible));
+    }
+
+    appendLog(message) {
+      const timestamp = new Date().toLocaleTimeString("ja-JP", { hour12: false });
+      this.logLines.unshift(`[${timestamp}] ${message}`);
+      this.logLines = this.logLines.slice(0, 8);
+      this.logText?.setText(this.logLines.join("\n"));
+    }
+
     updateHud() {
-      const ui = this.config.ui;
       const maxWaves = this.config.waves.max;
-      this.playerHpText?.setText(
-        this.playerStats.hp ? `${ui.hudPlayerHp}: ${this.playerStats.hp}` : `${ui.hudPlayerHp}: --`,
-      );
-      this.enemyHpText?.setText(
-        this.enemyStats.hp ? `${ui.hudEnemyHp}: ${this.enemyStats.hp}` : `${ui.hudEnemyHp}: --`,
-      );
-      this.waveText?.setText(`${ui.hudWave}: ${this.wave}/${maxWaves}`);
-      this.scoreText?.setText(`${ui.hudScore}: ${this.score}`);
+      const elapsedMs = Math.max(0, this.time.now - this.battleStartTime);
+      const elapsedSec = Math.floor(elapsedMs / 1000);
+      const minutes = String(Math.floor(elapsedSec / 60)).padStart(2, "0");
+      const seconds = String(elapsedSec % 60).padStart(2, "0");
+
+      this.hudWaveTime?.setText(`WAVE ${this.wave}/${maxWaves}  TIME ${minutes}:${seconds}`);
+      this.hudScore?.setText(`SCORE ${this.score}`);
+      const playerRatio = this.playerStats.maxHp
+        ? this.playerStats.hp / this.playerStats.maxHp
+        : 0;
+      const enemyRatio = this.enemyStats.maxHp ? this.enemyStats.hp / this.enemyStats.maxHp : 0;
+      if (this.hudHpPlayer) {
+        this.hudHpPlayer.width = this.hudHpBaseWidth * Phaser.Math.Clamp(playerRatio, 0, 1);
+      }
+      if (this.hudHpEnemy) {
+        this.hudHpEnemy.width = this.hudHpBaseWidth * Phaser.Math.Clamp(enemyRatio, 0, 1);
+      }
     }
 
     handleCombat(now) {
@@ -630,6 +765,7 @@
       }
       this.state = "waveClear";
       this.statusText.setText(`WAVE ${this.wave} クリア +${waveScore}`);
+      this.appendLog(`WAVE ${this.wave} clear +${waveScore}`);
       this.wave += 1;
       this.time.delayedCall(1200, () => {
         this.state = "playing";
@@ -649,12 +785,17 @@
       this.resultText.setText(`最終スコア: ${this.score}`);
       this.resultText.setVisible(true);
       this.retryButton.setVisible(true);
+      this.appendLog(win ? "Battle complete" : "Player destroyed");
     }
 
     update(time) {
       if (this.state !== "playing") {
+        this.statusText?.setVisible(true);
         return;
       }
+
+      this.statusText?.setVisible(false);
+      this.updateHud();
 
       const speed = this.playerStats.speed;
       const dx = this.target.x - this.player.x;
