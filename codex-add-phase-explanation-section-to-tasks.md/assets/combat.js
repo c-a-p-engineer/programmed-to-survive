@@ -16,10 +16,13 @@
       this.weaponMainIndex = 0;
       this.weaponSubIndex = 0;
       this.aiIndex = 0;
+      this.themeIndex = 0;
       this.nextPlayerAttack = 0;
       this.nextEnemyAttack = 0;
       this.nextSubAttack = 0;
       this.target = new Phaser.Math.Vector2(0, 0);
+      this.backgroundRect = null;
+      this.titleText = null;
       this.statusText = null;
       this.playerHpText = null;
       this.enemyHpText = null;
@@ -29,15 +32,22 @@
       this.weaponMainText = null;
       this.weaponSubText = null;
       this.aiText = null;
+      this.themeText = null;
       this.startButton = null;
+      this.startButtonContainer = null;
+      this.startHintText = null;
       this.startUiElements = [];
+      this.startOptions = [];
+      this.themePanels = [];
       this.resultText = null;
       this.retryButton = null;
     }
 
     create() {
       const { width, height } = this.scale;
-      this.add.rectangle(width / 2, height / 2, width, height, 0x0b1020).setDepth(-2);
+      this.backgroundRect = this.add
+        .rectangle(width / 2, height / 2, width, height, 0x0b1020)
+        .setDepth(-2);
       this.createTextures();
 
       this.player = this.physics.add.image(width / 2, height * 0.7, "player");
@@ -50,7 +60,7 @@
 
       this.obstacles = this.physics.add.staticGroup();
 
-      this.add.text(16, 12, this.config.ui.title, {
+      this.titleText = this.add.text(16, 12, this.config.ui.title, {
         fontFamily: "'Noto Sans JP', sans-serif",
         fontSize: "14px",
         color: "#8be3ff",
@@ -86,7 +96,7 @@
         })
         .setOrigin(0.5);
 
-      const optionWidth = Math.min(300, width * 0.78);
+      const optionWidth = Math.min(320, width * 0.8);
       const optionHeight = 32;
       const optionGap = 36;
       const optionX = width / 2;
@@ -123,15 +133,26 @@
         optionWidth,
         optionHeight,
       );
+      const themeOption = this.createOptionButton(
+        optionX,
+        optionY + optionGap * 4,
+        "UIテーマ: --",
+        () => this.cycleTheme(),
+        optionWidth,
+        optionHeight,
+      );
       this.shipText = shipOption.text;
       this.weaponMainText = mainOption.text;
       this.weaponSubText = subOption.text;
       this.aiText = aiOption.text;
+      this.themeText = themeOption.text;
+      this.startOptions = [shipOption, mainOption, subOption, aiOption, themeOption];
       this.startUiElements.push(
         shipOption.container,
         mainOption.container,
         subOption.container,
         aiOption.container,
+        themeOption.container,
       );
 
       const startButton = this.createActionButton(
@@ -146,15 +167,17 @@
         Math.min(240, width * 0.6),
       );
       this.startButton = startButton.text;
+      this.startButtonContainer = startButton.container;
       this.startUiElements.push(startButton.container);
 
-      this.add
+      this.startHintText = this.add
         .text(width / 2, height / 2 + 110, this.config.ui.startHint, {
           fontFamily: "'Noto Sans JP', sans-serif",
           fontSize: "12px",
           color: "#cbd5f5",
         })
         .setOrigin(0.5);
+      this.startUiElements.push(this.startHintText);
 
       this.resultText = this.add
         .text(width / 2, height / 2 + 110, "", {
@@ -196,6 +219,7 @@
       });
 
       this.target.set(width / 2, height * 0.7);
+      this.applyTheme();
       this.toStart();
     }
 
@@ -236,7 +260,7 @@
         Phaser.Geom.Rectangle.Contains,
       );
       container.on("pointerdown", onTap);
-      return { container, text };
+      return { container, text, background };
     }
 
     createActionButton(x, y, label, onTap, width) {
@@ -257,7 +281,7 @@
         Phaser.Geom.Rectangle.Contains,
       );
       container.on("pointerdown", onTap);
-      return { container, text };
+      return { container, text, background };
     }
 
     cycleShip() {
@@ -280,15 +304,195 @@
       this.updateLoadoutText();
     }
 
+    cycleTheme() {
+      this.themeIndex = (this.themeIndex + 1) % this.config.uiThemes.length;
+      this.applyTheme();
+      this.updateLoadoutText();
+    }
+
     updateLoadoutText() {
       const ship = this.config.loadouts.ships[this.shipIndex];
       const weaponMain = this.config.loadouts.weaponsMain[this.weaponMainIndex];
       const weaponSub = this.config.loadouts.weaponsSub[this.weaponSubIndex];
       const aiType = this.config.loadouts.aiTypes[this.aiIndex];
+      const theme = this.config.uiThemes[this.themeIndex];
       this.shipText?.setText(`機体: ${ship.label}`);
       this.weaponMainText?.setText(`メイン武器: ${weaponMain.label}`);
       this.weaponSubText?.setText(`サブ武器: ${weaponSub.label}`);
       this.aiText?.setText(`AI性格: ${aiType.label}`);
+      this.themeText?.setText(`UIテーマ: ${theme.label}`);
+    }
+
+    toCssColor(value) {
+      return `#${value.toString(16).padStart(6, "0")}`;
+    }
+
+    applyTheme() {
+      const theme = this.config.uiThemes[this.themeIndex];
+      const palette = theme.palette;
+      const { width, height } = this.scale;
+      this.backgroundRect?.setFillStyle(palette.bg, 1);
+
+      const panelCss = this.toCssColor(palette.panel);
+
+      this.titleText?.setColor(palette.accentText);
+      this.statusText?.setColor(palette.text);
+      this.playerHpText?.setColor(palette.accentText);
+      this.enemyHpText?.setColor(palette.highlightText);
+      this.waveText?.setColor(palette.text);
+      this.scoreText?.setColor(palette.subText);
+      this.resultText?.setColor(palette.highlightText);
+      this.startHintText?.setColor(palette.subText);
+      this.retryButton?.setStyle({ color: palette.highlightText, backgroundColor: panelCss });
+
+      this.startOptions.forEach((option) => {
+        option.background.setFillStyle(palette.panel, 0.7);
+        option.background.setStrokeStyle(1, palette.panelBorder, 0.8);
+        option.text.setColor(palette.text);
+      });
+
+      if (this.startButtonContainer && this.startButton) {
+        const background = this.startButtonContainer.list[0];
+        background.setFillStyle(palette.panel, 0.9);
+        background.setStrokeStyle(1, palette.highlight, 0.8);
+        this.startButton.setColor(palette.highlightText);
+      }
+
+      this.updateLayout(theme.layout, width, height);
+      this.updateThemePanels(theme.layout, palette, width, height);
+    }
+
+    updateLayout(layout, width, height) {
+      const layoutConfig = this.getLayoutConfig(layout, width, height);
+      if (this.titleText) {
+        if (layoutConfig.title.originX !== undefined) {
+          this.titleText.setOrigin(layoutConfig.title.originX, 0);
+        }
+        this.titleText.setPosition(layoutConfig.title.x, layoutConfig.title.y);
+      }
+      this.statusText?.setPosition(layoutConfig.status.x, layoutConfig.status.y);
+      this.playerHpText?.setPosition(layoutConfig.hud.playerHp.x, layoutConfig.hud.playerHp.y);
+      this.enemyHpText?.setPosition(layoutConfig.hud.enemyHp.x, layoutConfig.hud.enemyHp.y);
+      this.waveText?.setPosition(layoutConfig.hud.wave.x, layoutConfig.hud.wave.y);
+      this.scoreText?.setPosition(layoutConfig.hud.score.x, layoutConfig.hud.score.y);
+
+      this.startOptions.forEach((option, index) => {
+        const y = layoutConfig.start.optionsY + layoutConfig.start.optionGap * index;
+        option.container.setPosition(layoutConfig.start.optionsX, y);
+      });
+
+      if (this.startButtonContainer) {
+        this.startButtonContainer.setPosition(layoutConfig.start.buttonX, layoutConfig.start.buttonY);
+      }
+
+      this.startHintText?.setPosition(layoutConfig.start.hintX, layoutConfig.start.hintY);
+      this.resultText?.setPosition(layoutConfig.result.x, layoutConfig.result.y);
+      this.retryButton?.setPosition(layoutConfig.retry.x, layoutConfig.retry.y);
+    }
+
+    getLayoutConfig(layout, width, height) {
+      if (layout === "split") {
+        return {
+          title: { x: width * 0.06, y: 16, originX: 0 },
+          status: { x: width * 0.68, y: height * 0.24 },
+          hud: {
+            playerHp: { x: 16, y: 68 },
+            enemyHp: { x: 16, y: 90 },
+            wave: { x: width - 180, y: 68 },
+            score: { x: width - 180, y: 90 },
+          },
+          start: {
+            optionsX: width * 0.28,
+            optionsY: height * 0.32,
+            optionGap: 34,
+            buttonX: width * 0.28,
+            buttonY: height * 0.62,
+            hintX: width * 0.28,
+            hintY: height * 0.67,
+          },
+          result: { x: width * 0.7, y: height * 0.56 },
+          retry: { x: width * 0.7, y: height * 0.64 },
+        };
+      }
+
+      if (layout === "bottom") {
+        return {
+          title: { x: width * 0.5, y: 16, originX: 0.5 },
+          status: { x: width * 0.5, y: height * 0.2 },
+          hud: {
+            playerHp: { x: 16, y: height - 52 },
+            enemyHp: { x: width - 180, y: height - 52 },
+            wave: { x: width * 0.5 - 40, y: height - 74 },
+            score: { x: width * 0.5 - 40, y: height - 52 },
+          },
+          start: {
+            optionsX: width * 0.5,
+            optionsY: height * 0.46,
+            optionGap: 32,
+            buttonX: width * 0.5,
+            buttonY: height * 0.72,
+            hintX: width * 0.5,
+            hintY: height * 0.77,
+          },
+          result: { x: width * 0.5, y: height * 0.65 },
+          retry: { x: width * 0.5, y: height * 0.73 },
+        };
+      }
+
+      return {
+        title: { x: 16, y: 12, originX: 0 },
+        status: { x: width / 2, y: height / 2 - 120 },
+        hud: {
+          playerHp: { x: 16, y: 36 },
+          enemyHp: { x: width - 180, y: 36 },
+          wave: { x: 16, y: 58 },
+          score: { x: width - 180, y: 58 },
+        },
+        start: {
+          optionsX: width / 2,
+          optionsY: height / 2 - 70,
+          optionGap: 36,
+          buttonX: width / 2,
+          buttonY: height / 2 + 70,
+          hintX: width / 2,
+          hintY: height / 2 + 110,
+        },
+        result: { x: width / 2, y: height / 2 + 110 },
+        retry: { x: width / 2, y: height / 2 + 150 },
+      };
+    }
+
+    updateThemePanels(layout, palette, width, height) {
+      this.themePanels.forEach((panel) => panel.destroy());
+      this.themePanels = [];
+
+      if (layout === "split") {
+        const leftPanel = this.add
+          .rectangle(width * 0.24, height / 2, width * 0.46, height * 0.86, palette.panel, 0.35)
+          .setStrokeStyle(1, palette.panelBorder, 0.6)
+          .setDepth(-1);
+        const rightPanel = this.add
+          .rectangle(width * 0.72, height / 2, width * 0.48, height * 0.78, palette.panel, 0.2)
+          .setStrokeStyle(1, palette.panelBorder, 0.4)
+          .setDepth(-1);
+        this.themePanels.push(leftPanel, rightPanel);
+        return;
+      }
+
+      if (layout === "bottom") {
+        const bottomPanel = this.add
+          .rectangle(width / 2, height - 48, width - 32, 72, palette.panel, 0.45)
+          .setStrokeStyle(1, palette.panelBorder, 0.5)
+          .setDepth(-1);
+        this.themePanels.push(bottomPanel);
+        return;
+      }
+
+      const topPanel = this.add
+        .rectangle(width / 2, 36, width - 32, 46, palette.panel, 0.35)
+        .setStrokeStyle(1, palette.panelBorder, 0.5)
+        .setDepth(-1);
+      this.themePanels.push(topPanel);
     }
 
     applyLoadout() {
