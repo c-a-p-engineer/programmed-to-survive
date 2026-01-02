@@ -1,6 +1,6 @@
-export function createGame({Phaser: PhaserRef, dbg, logToast, pushMechLog, onEndBattle} = {}) {
+export function createGame({Phaser: PhaserRef, dbg: dbgFn, logToast, pushMechLog, onEndBattle} = {}) {
   const Phaser = PhaserRef || window.Phaser;
-  const safeDbg = typeof dbg === "function" ? dbg : () => {};
+  const safeDbg = typeof dbgFn === "function" ? dbgFn : () => {};
   const safeLogToast = typeof logToast === "function" ? logToast : () => {};
   const safePushMechLog = typeof pushMechLog === "function" ? pushMechLog : () => {};
   const endBattleCallback = typeof onEndBattle === "function" ? onEndBattle : () => {};
