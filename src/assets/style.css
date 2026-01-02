@@ -16,86 +16,18 @@ body {
   align-items: center;
   justify-content: center;
   background: radial-gradient(circle at top, #2d3447, #0b0d12 70%);
-  padding: 12px;
+  padding: 0;
 }
 
 #app {
-  width: min(920px, 96vw);
-  display: grid;
-  gap: 16px;
-}
-
-.hud {
-  background: rgba(18, 24, 38, 0.9);
-  padding: 16px;
-  border-radius: 12px;
-  border: 1px solid rgba(130, 144, 173, 0.2);
-}
-
-.hud h1 {
-  margin: 0 0 4px;
-  font-size: 1.4rem;
-}
-
-.hud p {
-  margin: 0;
-  color: #b8c2d6;
+  width: 100vw;
+  height: 100vh;
+  display: block;
 }
 
 #game {
-  height: min(540px, 70vh);
-  border-radius: 16px;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
   overflow: hidden;
-  border: 1px solid rgba(133, 148, 179, 0.3);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-}
-
-.tips {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  font-size: 0.85rem;
-  color: #b3bdd3;
-  flex-wrap: wrap;
-}
-
-@media (max-width: 720px) {
-  #app {
-    width: min(680px, 100%);
-    gap: 12px;
-  }
-
-  .hud h1 {
-    font-size: 1.15rem;
-  }
-
-  .hud p {
-    font-size: 0.9rem;
-  }
-
-  #game {
-    height: min(520px, 62vh);
-  }
-}
-
-@media (orientation: landscape) {
-  body {
-    padding: 8px;
-  }
-
-  #app {
-    width: min(1100px, 98vw);
-    gap: 10px;
-  }
-
-  #game {
-    height: min(480px, 60vh);
-  }
-}
-
-@media (max-width: 600px) {
-  .tips {
-    flex-direction: column;
-    gap: 4px;
-  }
 }
