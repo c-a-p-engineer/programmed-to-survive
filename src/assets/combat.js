@@ -74,69 +74,82 @@
       this.headerBar = this.add
         .rectangle(width / 2, 26, width - 24, 36, 0x0f172a, 0.95)
         .setStrokeStyle(1, 0x223240, 0.9);
+      this.headerBar.setDepth(2);
       this.headerTitle = this.add.text(28, 16, "PROGRAMMED TO SURVIVE", {
         fontFamily: "'Noto Sans JP', sans-serif",
         fontSize: "14px",
         color: "#00f0c8",
         fontStyle: "600",
       });
+      this.headerTitle.setDepth(2);
       this.headerTag = this.add.text(width - 28, 16, "prototype / one file", {
         fontFamily: "'Noto Sans JP', sans-serif",
         fontSize: "12px",
         color: "#94a3b8",
       });
       this.headerTag.setOrigin(1, 0);
+      this.headerTag.setDepth(2);
 
       this.debugBar = this.add
         .rectangle(width / 2, 68, width - 24, 32, 0x111827, 0.9)
         .setStrokeStyle(1, 0x223240, 0.7);
+      this.debugBar.setDepth(2);
       this.debugText = this.add.text(width / 2, 60, "DEBUG", {
         fontFamily: "'Noto Sans JP', sans-serif",
         fontSize: "12px",
         color: "#cbd5f5",
       });
       this.debugText.setOrigin(0.5, 0);
+      this.debugText.setDepth(2);
 
       this.hudPanel = this.add
         .rectangle(width * 0.34, 120, width * 0.62, 70, 0x0b121a, 0.9)
         .setStrokeStyle(1, 0x223240, 0.6)
         .setVisible(false);
+      this.hudPanel.setDepth(2);
       this.hudWaveTime = this.add.text(width * 0.06, 96, "WAVE 1  TIME 00:00", {
         fontFamily: "'Noto Sans JP', sans-serif",
         fontSize: "12px",
         color: "#e2e8f0",
       });
       this.hudWaveTime.setVisible(false);
+      this.hudWaveTime.setDepth(2);
       this.hudScore = this.add.text(width * 0.6, 96, "SCORE 0", {
         fontFamily: "'Noto Sans JP', sans-serif",
         fontSize: "18px",
         color: "#e2e8f0",
       });
       this.hudScore.setVisible(false);
+      this.hudScore.setDepth(2);
       this.hudHpPlayer = this.add
         .rectangle(width * 0.1, 126, width * 0.26, 10, 0x00f0c8, 1)
         .setOrigin(0, 0.5)
         .setVisible(false);
+      this.hudHpPlayer.setDepth(2);
       this.hudHpEnemy = this.add
         .rectangle(width * 0.1, 142, width * 0.26, 8, 0xd946ef, 0.9)
         .setOrigin(0, 0.5)
         .setVisible(false);
+      this.hudHpEnemy.setDepth(2);
       this.hudLoadout = this.add.text(width * 0.06, 154, "", {
         fontFamily: "'Noto Sans JP', sans-serif",
         fontSize: "11px",
         color: "#94a3b8",
       });
       this.hudLoadout.setVisible(false);
+      this.hudLoadout.setDepth(2);
       this.logPanel = this.add
         .rectangle(width * 0.74, 200, width * 0.4, 120, 0x0b121a, 0.85)
         .setStrokeStyle(1, 0x223240, 0.5)
         .setVisible(false);
+      this.logPanel.setDepth(2);
       this.logText = this.add.text(width * 0.58, 152, "", {
         fontFamily: "'Noto Sans JP', sans-serif",
         fontSize: "10px",
         color: "#cbd5f5",
       });
       this.logText.setVisible(false);
+      this.logText.setDepth(2);
 
       this.statusText = this.add
         .text(width / 2, height / 2 - 120, this.config.ui.startHeadline, {
@@ -194,6 +207,7 @@
         subOption.container,
         aiOption.container,
       );
+      this.startOptions.forEach((option) => option.container.setDepth(3));
 
       const actionButtonWidth = Math.min(220, width * 0.4);
       const startButton = this.createActionButton(
@@ -210,6 +224,7 @@
       this.startButton = startButton.text;
       this.startButtonContainer = startButton.container;
       this.startUiElements.push(startButton.container);
+      this.startButtonContainer.setDepth(3);
 
       const randomButton = this.createActionButton(
         width / 2,
@@ -225,6 +240,7 @@
       this.randomButton = randomButton.text;
       this.randomButtonContainer = randomButton.container;
       this.startUiElements.push(randomButton.container);
+      this.randomButtonContainer.setDepth(3);
 
       this.startHintText = this.add
         .text(width / 2, height / 2 + 110, this.config.ui.startHint, {
@@ -233,6 +249,7 @@
           color: "#cbd5f5",
         })
         .setOrigin(0, 0.5);
+      this.startHintText.setDepth(3);
       this.startUiElements.push(this.startHintText);
 
       this.resultText = this.add
@@ -614,6 +631,7 @@
       this.updateHud();
       this.statusText.setText(this.config.ui.startHeadline);
       this.startUiElements.forEach((element) => element.setVisible(true));
+      this.startUiElements.forEach((element) => element.setDepth(3));
       this.setBattleUiVisible(false);
       this.logLines = [];
       this.logText?.setText("");

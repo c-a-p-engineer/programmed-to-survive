@@ -1,7 +1,7 @@
 window.PTS_CONFIG = {
   game: {
-    width: 820,
-    height: 520,
+    width: 720,
+    height: 1280,
     backgroundColor: "#0b1020",
   },
   ui: {
