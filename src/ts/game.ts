@@ -1,5 +1,22 @@
-export function createGame({Phaser: PhaserRef, dbg: dbgFn, logToast: logToastFn, pushMechLog: pushMechLogFn, onEndBattle} = {}) {
-  const Phaser = PhaserRef || window.Phaser;
+import PhaserLib from "phaser";
+
+type DebugFn = (msg: string) => void;
+type LogToastFn = (msg: string) => void;
+type PushMechLogFn = (type: string, timeMs: number, msg: string) => void;
+type FrameConfig = {name: string; hp: number; en: number; enRegen: number; speed: number};
+type WeaponConfig = {name: string; range: number; dps: number; cd: number; type: string; speed?: number; radius?: number; pierce?: boolean; explodeOnObstacle?: boolean; armMs?: number};
+type AIConfig = {name: string; keep: number; fleeHp: number; prefer: string};
+type BattleConfig = {frame: FrameConfig; wpnA: WeaponConfig; wpnB: WeaponConfig; ai: AIConfig};
+type CreateGameOptions = {
+  Phaser?: typeof PhaserLib;
+  dbg?: DebugFn;
+  logToast?: LogToastFn;
+  pushMechLog?: PushMechLogFn;
+  onEndBattle?: (score: number, timeSec: number, cfg: BattleConfig) => void;
+};
+
+export function createGame({Phaser: PhaserRef, dbg: dbgFn, logToast: logToastFn, pushMechLog: pushMechLogFn, onEndBattle}: CreateGameOptions = {}) {
+  const Phaser = PhaserRef || PhaserLib;
   const safeDbg = typeof dbgFn === "function" ? dbgFn : () => {};
   const safeLogToast = typeof logToastFn === "function" ? logToastFn : () => {};
   const safePushMechLog = typeof pushMechLogFn === "function" ? pushMechLogFn : () => {};

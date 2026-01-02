@@ -1,15 +1,14 @@
-import {DATA, WPN, FRAME, AI} from "./data.js";
-import {initDebugPanel} from "./debug.js";
-import {initMechLog} from "./mech-log.js";
-import {initLoadoutUI} from "./ui.js";
-import {createGame} from "./game.js";
+import {DATA, WPN, FRAME, AI} from "./data";
+import {initDebugPanel} from "./debug";
+import {initMechLog} from "./mech-log";
+import {initLoadoutUI} from "./ui";
+import {createGame} from "./game";
 
 const {dbg} = initDebugPanel();
 const {pushMechLog} = initMechLog();
 const ui = initLoadoutUI({data: {DATA, WPN, FRAME, AI}});
 
 const {bootGame, destroyGame} = createGame({
-  Phaser: window.Phaser,
   dbg,
   logToast: ui.logToast,
   pushMechLog,

@@ -26,5 +26,6 @@
 
 ## 開発メモ
 - 配信対象は `public/` ディレクトリ
-- ソースは `src/` にあり、`./scripts/build.sh` で `public/` を生成します（`public/` はコミット対象外）
-- Phaser は CDN から読み込むため、絶対パス（例: `/assets/...`）は使用せず、相対パスで参照してください
+- ソースは `src/` にあり、`npm install` 後に `npm run build`（または `./scripts/build.sh`）で `public/` を生成します（`public/` はコミット対象外）
+- Phaser はローカル依存（`node_modules`）をバンドルして配信します
+- 型/構文チェックは `npm run typecheck` で実行します
