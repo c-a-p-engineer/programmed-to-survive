@@ -34,6 +34,10 @@ jobs:
             echo "public/index.html not found" >&2
             exit 1
           fi
+          if [ ! -f public/ui/index.html ]; then
+            echo "public/ui/index.html not found" >&2
+            exit 1
+          fi
           if [ ! -f public/assets/main.js ]; then
             echo "public/assets/main.js not found" >&2
             exit 1
@@ -74,19 +78,23 @@ jobs:
             exit 0
           fi
           PREVIEW_URL="https://${OWNER}.github.io/${REPO}/${SAFE_BRANCH}/"
+          UI_PREVIEW_URL="https://${OWNER}.github.io/${REPO}/${SAFE_BRANCH}/ui/"
           BODY=$(cat <<'BODY'
           【Preview】
           __PREVIEW_URL__
+          UI Preview: __UI_PREVIEW_URL__
 
           【Checklist】
           - [ ] ゲームが起動する
           - [ ] タップ/クリックが反応する
           - [ ] スマホ縦画面でUIが崩れない
+          - [ ] UI Preview（/ui/）をスマホ縦で確認した
           - [ ] 60秒放置しても落ちない
           - [ ] 致命的な console error が出ていない
           BODY
           )
           BODY=${BODY/__PREVIEW_URL__/${PREVIEW_URL}}
+          BODY=${BODY/__UI_PREVIEW_URL__/${UI_PREVIEW_URL}}
           curl -fsSL -X POST -H "Authorization: Bearer ${GITHUB_TOKEN}" -H "Accept: application/vnd.github+json" \
             "${API_URL}/repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" \
             -d "$(jq -n --arg body "${BODY}" '{body: $body}')"
