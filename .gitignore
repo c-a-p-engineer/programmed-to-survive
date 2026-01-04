@@ -2,3 +2,4 @@
 public/
 # Explicitly ignore placeholder in generated assets
 public/assets/.keep
+node_modules/
