@@ -34,8 +34,8 @@ jobs:
             echo "public/index.html not found" >&2
             exit 1
           fi
-          if [ ! -f public/ui-preview.html ]; then
-            echo "public/ui-preview.html not found" >&2
+          if [ ! -f public/ui/index.html ]; then
+            echo "public/ui/index.html not found" >&2
             exit 1
           fi
           if [ ! -f public/assets/main.js ]; then
@@ -78,7 +78,7 @@ jobs:
             exit 0
           fi
           PREVIEW_URL="https://${OWNER}.github.io/${REPO}/${SAFE_BRANCH}/"
-          UI_PREVIEW_URL="https://${OWNER}.github.io/${REPO}/${SAFE_BRANCH}/ui-preview.html"
+          UI_PREVIEW_URL="https://${OWNER}.github.io/${REPO}/${SAFE_BRANCH}/ui/"
           BODY=$(cat <<'BODY'
           【Preview】
           __PREVIEW_URL__
@@ -88,7 +88,7 @@ jobs:
           - [ ] ゲームが起動する
           - [ ] タップ/クリックが反応する
           - [ ] スマホ縦画面でUIが崩れない
-          - [ ] UI Preview をスマホ縦で確認した
+          - [ ] UI Preview（/ui/）をスマホ縦で確認した
           - [ ] 60秒放置しても落ちない
           - [ ] 致命的な console error が出ていない
           BODY
