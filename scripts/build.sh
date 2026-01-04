@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SRC_DIR="src"
-OUT_DIR="public"
+npm run build
 
-mkdir -p "${OUT_DIR}/assets"
+# Ensure UI folder is available in build output (for workflow checks and previews)
+mkdir -p public/ui
+rsync -a --delete src/ui/ public/ui/
 
-rsync -a --delete "${SRC_DIR}/" "${OUT_DIR}/"
-
-rm -f "${OUT_DIR}/assets/.keep"
+# Normalize hashed main bundle to public/assets/main.js for workflow checks
+mkdir -p public/assets
+MAIN_BUNDLE=$(ls public/assets/main-*.js 2>/dev/null | head -n 1 || true)
+if [ -n "${MAIN_BUNDLE}" ]; then
+  cp "${MAIN_BUNDLE}" public/assets/main.js
+fi
