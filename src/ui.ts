@@ -57,6 +57,10 @@ export const createUi = (data: UiData): UiController => {
   let debugVisible = false;
   const debugLines: string[] = [];
   const mechLog: { t: number; cls: string; msg: string }[] = [];
+  const debugEnabled = window.location.hostname === "localhost" || window.location.search.includes("debug=1");
+
+  document.body.classList.toggle("is-debug", debugEnabled);
+  debugButton.style.display = debugEnabled ? "block" : "none";
 
   const setDebug = (message: string): void => {
     const t = new Date().toISOString().slice(11, 19);
@@ -74,9 +78,15 @@ export const createUi = (data: UiData): UiController => {
     const cls = `c-${type ?? "sys"}`;
     mechLog.push({ t: timeMs | 0, cls, msg });
     if (mechLog.length > 10) mechLog.shift();
-    mechLogLines.innerHTML = mechLog
-      .map((line) => `<div class='line ${line.cls}'>${fmtHMSms(line.t)} ${escapeHtml(line.msg)}</div>`)
-      .join("");
+    const minLines = 5;
+    const lines = mechLog.map((line, idx) => {
+      const ageCls = idx === mechLog.length - 1 ? "is-latest" : "is-old";
+      return `<div class='line ${line.cls} ${ageCls}'>${fmtHMSms(line.t)} ${escapeHtml(line.msg)}</div>`;
+    });
+    while (lines.length < minLines) {
+      lines.push("<div class='line placeholder'>&nbsp;</div>");
+    }
+    mechLogLines.innerHTML = lines.join("");
   };
 
   const fillSelect = (select: HTMLSelectElement, items: { id: string; name: string }[]): void => {
@@ -131,10 +141,12 @@ export const createUi = (data: UiData): UiController => {
   selAI.addEventListener("change", refreshDesc);
   refreshDesc();
 
-  debugButton.addEventListener("click", () => {
-    debugVisible = !debugVisible;
-    debugPanel.style.display = debugVisible ? "block" : "none";
-  });
+  if (debugEnabled) {
+    debugButton.addEventListener("click", () => {
+      debugVisible = !debugVisible;
+      debugPanel.style.display = debugVisible ? "block" : "none";
+    });
+  }
 
   window.addEventListener("error", (event) => {
     const msg = event?.message ? event.message : String(event);

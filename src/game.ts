@@ -27,14 +27,19 @@ export const startBattle = (loadout: BattleLoadout, hooks: UiHooks): GameHandle 
     // Top: score/wave/time. Bottom: mech stats.
     var cam = scene.cameras.main;
     var W = cam.width, H = cam.height;
+    var pad = 4;
+    var topY = 0;
+    var topH = 56;
+    var bottomH = 118;
+    var bottomY = H - bottomH;
 
     // top plate
     if(scene.topPanelG){
       scene.topPanelG.clear();
-      scene.topPanelG.fillStyle(0x000000, 0.58);
-      scene.topPanelG.fillRoundedRect(10, 10, W-20, 108, 16);
+      scene.topPanelG.fillStyle(0x000000, 0.62);
+      scene.topPanelG.fillRoundedRect(2, topY, W-4, topH, 14);
       scene.topPanelG.lineStyle(2, 0x00ffcc, 0.18);
-      scene.topPanelG.strokeRoundedRect(10, 10, W-20, 108, 16);
+      scene.topPanelG.strokeRoundedRect(2, topY, W-4, topH, 14);
     }
 
     var ms = Math.floor((tSec||0)*1000);
@@ -44,42 +49,104 @@ export const startBattle = (loadout: BattleLoadout, hooks: UiHooks): GameHandle 
 
     if(scene.scoreText){
       scene.scoreText.setText("SCORE " + String(state.score|0));
-      scene.scoreText.setPosition(W - scene.scoreText.width - 18, 18);
+      scene.scoreText.setPosition(0, 0);
     }
     if(scene.waveTimeText){
       scene.waveTimeText.setText("WAVE " + String(state.wave||1) + "   TIME " + mm + ":" + ss);
-      scene.waveTimeText.setPosition(18, 20);
-    }
-    if(scene.lockText){
-      var ld = (state.targetDist!=null) ? String(state.targetDist|0) : "--";
-      scene.lockText.setText("LOCK " + ld + "m");
-      scene.lockText.setPosition(18, 54);
-    }
-    if(scene.weaponText){
-      var wa = state.cfg.wpnA ? state.cfg.wpnA.name : "A";
-      var wb = state.cfg.wpnB ? state.cfg.wpnB.name : "B";
-      scene.weaponText.setText("MAIN " + wa + "  R" + (state.cfg.wpnA.range||0) + "   |   SUB " + wb + "  R" + (state.cfg.wpnB.range||0));
-      scene.weaponText.setPosition(18, 84);
+      scene.waveTimeText.setPosition(pad + 4, topY + 10);
     }
 
     // bottom plate (mech info)
     if(scene.bottomPanelG){
       scene.bottomPanelG.clear();
-      scene.bottomPanelG.fillStyle(0x000000, 0.52);
-      scene.bottomPanelG.fillRoundedRect(10, H-74, W-20, 64, 16);
+      scene.bottomPanelG.fillStyle(0x000000, 0.55);
+      scene.bottomPanelG.fillRoundedRect(2, bottomY, W-4, bottomH, 14);
       scene.bottomPanelG.lineStyle(1, 0x00ffcc, 0.14);
-      scene.bottomPanelG.strokeRoundedRect(10, H-74, W-20, 64, 16);
+      scene.bottomPanelG.strokeRoundedRect(2, bottomY, W-4, bottomH, 14);
     }
     if(scene.mechInfoText){
-      var hp = Math.max(0, state.hp|0), mhp = Math.max(1, state.maxHp|0);
-      var en = Math.max(0, state.en|0), men = Math.max(1, state.maxEn|0);
+      var wa = state.cfg.wpnA ? state.cfg.wpnA.name : "A";
+      var wb = state.cfg.wpnB ? state.cfg.wpnB.name : "B";
+      var frameName = state.cfg.frame ? state.cfg.frame.name : "-";
+      var aiName = state.cfg.ai ? state.cfg.ai.name : "-";
       scene.mechInfoText.setText(
-        "HP " + hp + "/" + mhp +
-        "   EN " + en + "/" + men +
-        "   SPD " + (state.moveSpd|0) +
-        "   KILL " + (state.kills|0)
+        "FRAME " + frameName +
+        "   AI " + aiName +
+        "   MAIN " + wa +
+        "   SUB " + wb
       );
-      scene.mechInfoText.setPosition(18, H-56);
+      scene.mechInfoText.setPosition(pad + 4, bottomY + bottomH - 10);
+    }
+
+    if(scene.hpText){
+      var hp = Math.max(0, state.hp|0), mhp = Math.max(1, state.hpMax ?? state.maxHp ?? 1);
+      scene.hpText.setText("HP " + hp + "/" + mhp);
+      scene.hpText.setPosition(pad + 4, bottomY + 12);
+    }
+    if(scene.expText){
+      var exp = Math.max(0, (state.exp ?? state.score ?? 0)|0);
+      scene.expText.setText("EXP " + exp);
+      scene.expText.setPosition(pad + 4, bottomY + 36);
+    }
+
+    if(scene.barG){
+      scene.barG.clear();
+      var barX = pad + 4;
+      var barY = bottomY + 62;
+      var bw = W - (pad * 2) - 8;
+      var bh = 10;
+      var hpR = clamp(state.hp / (state.hpMax || 1), 0, 1);
+      scene.barG.fillStyle(0xffffff, 0.12);
+      scene.barG.fillRoundedRect(barX, barY, bw, bh, 6);
+      scene.barG.fillStyle(0x00ffcc, 0.6);
+      scene.barG.fillRoundedRect(barX, barY, Math.max(4, bw * hpR), bh, 6);
+      var enR = clamp(state.en / (state.enMax || 1), 0, 1);
+      scene.barG.fillStyle(0xffffff, 0.1);
+      scene.barG.fillRoundedRect(barX, barY + 14, bw, bh, 6);
+      scene.barG.fillStyle(0x66aaff, 0.6);
+      scene.barG.fillRoundedRect(barX, barY + 14, Math.max(4, bw * enR), bh, 6);
+    }
+
+    if(scene.weaponMainText){
+      var waName = state.cfg.wpnA ? state.cfg.wpnA.name : "A";
+      scene.weaponMainText.setText("MAIN " + waName);
+      scene.weaponMainText.setPosition(pad + 34, bottomY + 82);
+    }
+    if(scene.weaponSubText){
+      var wbName = state.cfg.wpnB ? state.cfg.wpnB.name : "B";
+      scene.weaponSubText.setText("SUB " + wbName);
+      scene.weaponSubText.setPosition(pad + 34, bottomY + 100);
+    }
+
+    if(scene.weaponG){
+      scene.weaponG.clear();
+      var iconX = pad + 4;
+      var iconSize = 18;
+      scene.weaponG.fillStyle(0x00ffcc, 0.85);
+      scene.weaponG.fillRoundedRect(iconX, bottomY + 80, iconSize, iconSize, 4);
+      scene.weaponG.fillStyle(0x66aaff, 0.85);
+      scene.weaponG.fillRoundedRect(iconX, bottomY + 98, iconSize, iconSize, 4);
+    }
+
+    if(scene.scorePanelG && scene.scoreText){
+      var scorePad = 8;
+      var scoreW = scene.scoreText.width + scorePad * 2;
+      var scoreH = scene.scoreText.height + 10;
+      var scoreX = W - scoreW - 2;
+      var scoreY = topY + 2;
+      scene.scorePanelG.clear();
+      scene.scorePanelG.fillStyle(0x000000, 0.62);
+      scene.scorePanelG.fillRoundedRect(scoreX, scoreY, scoreW, scoreH, 12);
+      scene.scorePanelG.lineStyle(2, 0x00ffcc, 0.2);
+      scene.scorePanelG.strokeRoundedRect(scoreX, scoreY, scoreW, scoreH, 12);
+      scene.scoreText.setPosition(scoreX + scorePad, scoreY + 4);
+    }
+
+    if(scene.radarG){
+      var radarR = Math.round(Math.min(60, Math.max(44, W * 0.16)));
+      scene.radarR = radarR;
+      scene.radarX = W - radarR - 16;
+      scene.radarY = bottomY - radarR - 14;
     }
 
     // expose time to DOM log
@@ -316,16 +383,9 @@ export const startBattle = (loadout: BattleLoadout, hooks: UiHooks): GameHandle 
 
 
         // HUD
-        self.hud = self.add.text(12, 12, "", {
-          fontFamily:"system-ui, sans-serif",
-          fontSize:"13px",
-          fill:"#e8eefc",
-          stroke:"#000000",
-          strokeThickness:3
-        }).setScrollFactor(0).setDepth(10);
         self.topPanelG = self.add.graphics().setScrollFactor(0).setDepth(11);
         self.bottomPanelG = self.add.graphics().setScrollFactor(0).setDepth(11);
-        self.mechInfoText = self.add.text(0,0,"", {fontFamily:"system-ui, sans-serif",fontSize:"16px",fontStyle:"700",fill:"#e8eefc",stroke:"#000",strokeThickness:5}).setScrollFactor(0).setDepth(12);
+        self.mechInfoText = self.add.text(0,0,"", {fontFamily:"system-ui, sans-serif",fontSize:"16px",fontStyle:"700",fill:"#e8eefc",stroke:"#000",strokeThickness:5}).setScrollFactor(0).setDepth(12).setOrigin(0,1);
 
 
         // bars
@@ -904,86 +964,25 @@ export const startBattle = (loadout: BattleLoadout, hooks: UiHooks): GameHandle 
             self.radarG.fillCircle(sx, sy, blocked ? 2 : 2.5);
           }
         }      // HUD elements (high readability)
-        self.scoreText = self.add.text(0,0,"SCORE 0", {fontFamily:"system-ui, sans-serif",fontSize:"38px",fontStyle:"700",fill:"#e8eefc",stroke:"#000",strokeThickness:6}).setScrollFactor(0).setDepth(12);
-        self.waveTimeText = self.add.text(0,0,"WAVE 1  TIME 00:00", {fontFamily:"system-ui, sans-serif",fontSize:"18px",fontStyle:"700",fill:"#e8eefc",stroke:"#000",strokeThickness:5}).setScrollFactor(0).setDepth(12);
-        self.weaponText = self.add.text(0,0,"", {fontFamily:"system-ui, sans-serif",fontSize:"15px",fill:"#e8eefc",stroke:"#000",strokeThickness:4}).setScrollFactor(0).setDepth(12);
-        self.lockText = self.add.text(0,0,"LOCK --", {fontFamily:"system-ui, sans-serif",fontSize:"15px",fill:"#ffb3b3",stroke:"#000",strokeThickness:4}).setScrollFactor(0).setDepth(12);
+        self.scorePanelG = self.add.graphics().setScrollFactor(0).setDepth(11);
+        self.scoreText = self.add.text(0,0,"SCORE 0", {fontFamily:"system-ui, sans-serif",fontSize:"20px",fontStyle:"700",fill:"#e8eefc",stroke:"#000",strokeThickness:4}).setScrollFactor(0).setDepth(12);
+        self.waveTimeText = self.add.text(0,0,"WAVE 1  TIME 00:00", {fontFamily:"system-ui, sans-serif",fontSize:"15px",fontStyle:"700",fill:"#e8eefc",stroke:"#000",strokeThickness:3}).setScrollFactor(0).setDepth(12);
+        self.hpText = self.add.text(0,0,"HP 0/0", {fontFamily:"system-ui, sans-serif",fontSize:"16px",fontStyle:"700",fill:"#e8eefc",stroke:"#000",strokeThickness:3}).setScrollFactor(0).setDepth(12);
+        self.expText = self.add.text(0,0,"EXP 0", {fontFamily:"system-ui, sans-serif",fontSize:"15px",fontStyle:"700",fill:"#ffd36b",stroke:"#000",strokeThickness:3}).setScrollFactor(0).setDepth(12);
+        self.weaponMainText = self.add.text(0,0,"MAIN", {fontFamily:"system-ui, sans-serif",fontSize:"13px",fill:"#e8eefc",stroke:"#000",strokeThickness:3}).setScrollFactor(0).setDepth(12);
+        self.weaponSubText = self.add.text(0,0,"SUB", {fontFamily:"system-ui, sans-serif",fontSize:"13px",fill:"#e8eefc",stroke:"#000",strokeThickness:3}).setScrollFactor(0).setDepth(12);
+        self.weaponG = self.add.graphics().setScrollFactor(0).setDepth(12);
 
 
         // HUD + bars
         updateHUD_V3(self, state, tSec);
 
 
-        // HUD LAYOUT V2 (mobile readability)
-        if(self.topPanelG){
-          self.topPanelG.clear();
-          var W = self.cameras.main.width;
-          // top plate (fixed to top)
-          self.topPanelG.fillStyle(0x000000, 0.55);
-          self.topPanelG.fillRoundedRect(10, 10, W-20, 104, 16);
-          self.topPanelG.lineStyle(2, 0x00ffcc, 0.18);
-          self.topPanelG.strokeRoundedRect(10, 10, W-20, 104, 16);
-        }
-        var Ww = self.cameras.main.width;
-
-        // big score (top-right)
-        if(self.scoreText){
-          self.scoreText.setText("SCORE " + String(state.score));
-          self.scoreText.setPosition(Ww - self.scoreText.width - 18, 18);
-        }
-
-        // wave + time (top-left)
-        var sec = Math.floor(tSec||0);
-        var mm = String(Math.floor(sec/60)).padStart(2,"0");
-        var ss = String(sec%60).padStart(2,"0");
-        if(self.waveTimeText){
-          self.waveTimeText.setText("WAVE " + String(state.wave||1) + "   TIME " + mm + ":" + ss);
-          self.waveTimeText.setPosition(18, 20);
-        }
-
-        // lock distance (mid-left)
-        if(self.lockText){
-          var ld = state.targetDist ? String(state.targetDist) : "--";
-          self.lockText.setText("LOCK " + ld + "m");
-          self.lockText.setPosition(18, 54);
-        }
-
-        // weapon line (bottom-left)
-        if(self.weaponText){
-          var wa = state.cfg.wpnA ? state.cfg.wpnA.name : "A";
-          var wb = state.cfg.wpnB ? state.cfg.wpnB.name : "B";
-          self.weaponText.setText("MAIN " + wa + "  R" + (state.cfg.wpnA.range||0) + "   |   SUB " + wb + "  R" + (state.cfg.wpnB.range||0));
-          self.weaponText.setPosition(18, 84);
-        }
-        var t = Math.floor((time - state.t0)/1000);
-        self.hud.setText([
-          "SCORE " + state.score + "   TIME " + t + "s",
-          "HP " + Math.floor(state.hp) + " / " + state.hpMax + "    EN " + Math.floor(state.en) + " / " + state.enMax,
-          "TARGET " + (state.target && state.target.active ? "LOCK" : "-") + "  DIST " + state.targetDist + "px",
-          "MAIN " + state.cfg.wpnA.name + " | SUB " + state.cfg.wpnB.name,
-          "AI " + state.cfg.ai.name + " | FRAME " + state.cfg.frame.name
-        ].join("\n"));
-
-        self.barG.clear();
-        // hp bar
-        var bw = 240, bh = 10, barX = 12, barY = 88;
-        var hpR = clamp(state.hp/state.hpMax, 0, 1);
-        self.barG.fillStyle(0xffffff, 0.10);
-        self.barG.fillRoundedRect(barX,barY,bw,bh,6);
-        self.barG.fillStyle(0x00ffcc, 0.55);
-        self.barG.fillRoundedRect(barX,barY,Math.max(4,bw*hpR),bh,6);
-        // en bar
-        var enR = clamp(state.en/state.enMax, 0, 1);
-        self.barG.fillStyle(0xffffff, 0.08);
-        self.barG.fillRoundedRect(barX,barY+14,bw,bh,6);
-        self.barG.fillStyle(0x66aaff, 0.55);
-        self.barG.fillRoundedRect(barX,barY+14,Math.max(4,bw*enR),bh,6);
-
         // death
         if(state.hp <= 0){
           state.dead = true;
           state.hp = 0;
-          endBattle(state.score, t, state.cfg);
+          endBattle(state.score, Math.floor(tSec || 0), state.cfg);
         }
         }catch(err: any){ dbg("EXCEPTION: " + (err && err.message ? err.message : err) + ((err && err.stack) ? ("\n"+err.stack) : "")); state.dead = true; }
       }

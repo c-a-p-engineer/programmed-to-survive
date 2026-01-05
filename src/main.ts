@@ -1,3 +1,4 @@
+import "./styles/main.scss";
 import { AI, DATA, FRAME, WPN } from "./data";
 import { startBattle, type GameHandle } from "./game";
 import { createUi } from "./ui";
