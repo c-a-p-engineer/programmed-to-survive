@@ -64,13 +64,29 @@
         <div class="sub">Phaserの上に重ねる想定。HUDは画面端固定。</div>
         <div class="hud">
           <div class="hud-top">
-            <div class="hud-chip">SCORE: 012345</div>
-            <div class="hud-chip">TIME: 01:23</div>
+            <div class="hud-chip">WAVE 1  TIME 01:23</div>
+            <div class="hud-score">
+              <div>SCORE 012345</div>
+            </div>
           </div>
           <div class="hud-bottom">
-            <div class="bar"><div></div></div>
-            <div class="hud-chip">HP</div>
-            <button class="btn btn--primary">Skill</button>
+            <div class="hud-chip hud-chip--wide">HP 130/130</div>
+            <div class="hud-chip hud-chip--accent">EXP 053</div>
+            <div class="hud-bars">
+              <div class="bar"><div></div></div>
+              <div class="bar bar--energy"><div></div></div>
+            </div>
+            <div class="hud-weapons">
+              <div class="weapon">
+                <span class="icon"></span>
+                <div class="label">MAIN Blade</div>
+              </div>
+              <div class="weapon">
+                <span class="icon icon--sub"></span>
+                <div class="label">SUB Mine</div>
+              </div>
+            </div>
+            <div class="hud-chip hud-chip--wide">FRAME Atlas  AI Balanced</div>
           </div>
         </div>
       </section>
