@@ -156,7 +156,9 @@ export const createUi = (data: UiData): UiController => {
   refreshDesc();
 
   startPanel.classList.remove("hidden");
+  startPanel.style.display = "flex";
   resultPanel.classList.add("hidden");
+  resultPanel.style.display = "none";
   mechLogPanel.style.display = "none";
 
   if (debugEnabled) {
@@ -202,15 +204,23 @@ export const createUi = (data: UiData): UiController => {
     onRetry: (handler) => btnRetry.addEventListener("click", handler),
     hideStart: () => {
       startPanel.classList.add("hidden");
+      startPanel.style.display = "none";
       mechLogPanel.style.display = "block";
     },
     showStart: () => {
       startPanel.classList.remove("hidden");
+      startPanel.style.display = "flex";
+      resultPanel.classList.add("hidden");
+      resultPanel.style.display = "none";
       mechLogPanel.style.display = "none";
     },
-    hideResult: () => resultPanel.classList.add("hidden"),
+    hideResult: () => {
+      resultPanel.classList.add("hidden");
+      resultPanel.style.display = "none";
+    },
     showResultPanel: () => {
       resultPanel.classList.remove("hidden");
+      resultPanel.style.display = "flex";
       mechLogPanel.style.display = "none";
     },
     getConfig,
