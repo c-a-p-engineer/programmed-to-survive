@@ -155,6 +155,10 @@ export const createUi = (data: UiData): UiController => {
   selAI.addEventListener("change", refreshDesc);
   refreshDesc();
 
+  startPanel.classList.remove("hidden");
+  resultPanel.classList.add("hidden");
+  mechLogPanel.style.display = "none";
+
   if (debugEnabled) {
     debugButton.addEventListener("click", () => {
       debugVisible = !debugVisible;
