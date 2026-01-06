@@ -57,6 +57,25 @@ export const createUi = (data: UiData): UiController => {
   let debugVisible = false;
   const debugLines: string[] = [];
   const mechLog: { t: number; cls: string; msg: string }[] = [];
+  const debugEnabled = window.location.hostname === "localhost" || window.location.search.includes("debug=1");
+
+  document.body.classList.toggle("is-debug", debugEnabled);
+  debugButton.style.display = debugEnabled ? "block" : "none";
+
+  const renderMechLog = (): void => {
+    const minLines = 5;
+    const lines = mechLog.map((line, idx) => {
+      const ageCls = idx === mechLog.length - 1 ? "is-latest" : "is-old";
+      return `<div class='line ${line.cls} ${ageCls}'>${fmtHMSms(line.t)} ${escapeHtml(line.msg)}</div>`;
+    });
+    while (lines.length < minLines) {
+      lines.push("<div class='line placeholder'>&nbsp;</div>");
+    }
+    mechLogLines.innerHTML = lines.join("");
+  };
+  mechLogPanel.style.display = "none";
+  mechLogPanel.style.visibility = "hidden";
+  renderMechLog();
 
   const setDebug = (message: string): void => {
     const t = new Date().toISOString().slice(11, 19);
@@ -71,12 +90,19 @@ export const createUi = (data: UiData): UiController => {
 
   const pushMechLog = (type: "sys" | "lock" | "kill" | "obj" | "dmg", timeMs: number, msg: string): void => {
     mechLogPanel.style.display = "block";
+    mechLogPanel.style.visibility = "visible";
     const cls = `c-${type ?? "sys"}`;
     mechLog.push({ t: timeMs | 0, cls, msg });
-    if (mechLog.length > 10) mechLog.shift();
-    mechLogLines.innerHTML = mechLog
-      .map((line) => `<div class='line ${line.cls}'>${fmtHMSms(line.t)} ${escapeHtml(line.msg)}</div>`)
-      .join("");
+    if (mechLog.length > 5) mechLog.shift();
+    renderMechLog();
+    mechLogPanel.style.opacity = "0";
+    requestAnimationFrame(() => {
+      mechLogPanel.style.opacity = "0.8";
+    });
+    window.clearTimeout((mechLogPanel as any).__fadeTimer);
+    (mechLogPanel as any).__fadeTimer = window.setTimeout(() => {
+      mechLogPanel.style.opacity = "0.35";
+    }, 2500);
   };
 
   const fillSelect = (select: HTMLSelectElement, items: { id: string; name: string }[]): void => {
@@ -131,10 +157,19 @@ export const createUi = (data: UiData): UiController => {
   selAI.addEventListener("change", refreshDesc);
   refreshDesc();
 
-  debugButton.addEventListener("click", () => {
-    debugVisible = !debugVisible;
-    debugPanel.style.display = debugVisible ? "block" : "none";
-  });
+  startPanel.classList.remove("hidden");
+  startPanel.style.display = "flex";
+  resultPanel.classList.add("hidden");
+  resultPanel.style.display = "none";
+  mechLogPanel.style.display = "none";
+  mechLogPanel.style.visibility = "hidden";
+
+  if (debugEnabled) {
+    debugButton.addEventListener("click", () => {
+      debugVisible = !debugVisible;
+      debugPanel.style.display = debugVisible ? "block" : "none";
+    });
+  }
 
   window.addEventListener("error", (event) => {
     const msg = event?.message ? event.message : String(event);
@@ -170,10 +205,30 @@ export const createUi = (data: UiData): UiController => {
   return {
     onStart: (handler) => btnStart.addEventListener("click", handler),
     onRetry: (handler) => btnRetry.addEventListener("click", handler),
-    hideStart: () => startPanel.classList.add("hidden"),
-    showStart: () => startPanel.classList.remove("hidden"),
-    hideResult: () => resultPanel.classList.add("hidden"),
-    showResultPanel: () => resultPanel.classList.remove("hidden"),
+    hideStart: () => {
+      startPanel.classList.add("hidden");
+      startPanel.style.display = "none";
+      mechLogPanel.style.display = "block";
+      mechLogPanel.style.visibility = "visible";
+    },
+    showStart: () => {
+      startPanel.classList.remove("hidden");
+      startPanel.style.display = "flex";
+      resultPanel.classList.add("hidden");
+      resultPanel.style.display = "none";
+      mechLogPanel.style.display = "none";
+      mechLogPanel.style.visibility = "hidden";
+    },
+    hideResult: () => {
+      resultPanel.classList.add("hidden");
+      resultPanel.style.display = "none";
+    },
+    showResultPanel: () => {
+      resultPanel.classList.remove("hidden");
+      resultPanel.style.display = "flex";
+      mechLogPanel.style.display = "none";
+      mechLogPanel.style.visibility = "hidden";
+    },
     getConfig,
     setToast,
     setDebug,
