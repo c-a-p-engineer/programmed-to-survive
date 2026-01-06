@@ -27,12 +27,13 @@ export const startBattle = (loadout: BattleLoadout, hooks: UiHooks): GameHandle 
     // Top: score/wave/time. Bottom: mech stats.
     var cam = scene.cameras.main;
     var W = cam.width, H = cam.height;
-    var pad = Math.max(2, Math.round(Math.min(W, H) * 0.015));
-    var edge = 2;
-    var topY = 0;
+    var base = Math.min(W, H);
+    var pad = Math.max(6, Math.round(base * 0.02));
+    var edge = Math.max(2, Math.round(base * 0.008));
+    var topY = edge;
     var topH = Math.max(40, Math.round(H * 0.065));
     var bottomH = Math.max(96, Math.round(H * 0.15));
-    var bottomY = H - bottomH;
+    var bottomY = H - bottomH - edge;
 
     // top plate
     if(scene.topPanelG){
@@ -56,17 +57,16 @@ export const startBattle = (loadout: BattleLoadout, hooks: UiHooks): GameHandle 
       scene.bottomPanelG.clear();
     }
     if(scene.mechInfoText){
-      var wa = state.cfg.wpnA ? state.cfg.wpnA.name : "A";
-      var wb = state.cfg.wpnB ? state.cfg.wpnB.name : "B";
       var frameName = state.cfg.frame ? state.cfg.frame.name : "-";
       var aiName = state.cfg.ai ? state.cfg.ai.name : "-";
       scene.mechInfoText.setText(
         "FRAME " + frameName +
-        "   AI " + aiName +
-        "   MAIN " + wa +
-        "   SUB " + wb
+        "   AI " + aiName
       );
-      scene.mechInfoText.setPosition(pad + 4, bottomY + bottomH - 10);
+      scene.mechInfoText.setWordWrapWidth(Math.round(W * 0.55), true);
+      scene.mechInfoText.setPosition(edge + pad, bottomY + bottomH - edge - 8);
+      scene.mechInfoText.setVisible(true);
+      scene.mechInfoText.setAlpha(0.9);
     }
 
     if(scene.hpGroup){
@@ -100,11 +100,12 @@ export const startBattle = (loadout: BattleLoadout, hooks: UiHooks): GameHandle 
       var trunc = function(name: string): string{
         return name.length > 16 ? name.slice(0, 15) + "…" : name;
       };
+      var weaponW = Math.max(140, Math.round(W * 0.28));
       scene.weaponMainText.setText("MAIN " + trunc(waName));
       scene.weaponSubText.setText("SUB " + trunc(wbName));
       scene.weaponMainText.setPosition(24, 0);
       scene.weaponSubText.setPosition(24, 22);
-      scene.weaponGroup.setPosition(W - edge - pad - 150, bottomY + pad);
+      scene.weaponGroup.setPosition(W - edge - pad - weaponW, bottomY + pad);
       scene.weaponGroup.setVisible(true);
       scene.weaponGroup.setAlpha(1);
       if(scene.weaponG){
