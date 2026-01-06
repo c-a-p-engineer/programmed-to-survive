@@ -74,6 +74,7 @@ export const createUi = (data: UiData): UiController => {
     mechLogLines.innerHTML = lines.join("");
   };
   mechLogPanel.style.display = "none";
+  mechLogPanel.style.visibility = "hidden";
   renderMechLog();
 
   const setDebug = (message: string): void => {
@@ -89,6 +90,7 @@ export const createUi = (data: UiData): UiController => {
 
   const pushMechLog = (type: "sys" | "lock" | "kill" | "obj" | "dmg", timeMs: number, msg: string): void => {
     mechLogPanel.style.display = "block";
+    mechLogPanel.style.visibility = "visible";
     const cls = `c-${type ?? "sys"}`;
     mechLog.push({ t: timeMs | 0, cls, msg });
     if (mechLog.length > 5) mechLog.shift();
@@ -160,6 +162,7 @@ export const createUi = (data: UiData): UiController => {
   resultPanel.classList.add("hidden");
   resultPanel.style.display = "none";
   mechLogPanel.style.display = "none";
+  mechLogPanel.style.visibility = "hidden";
 
   if (debugEnabled) {
     debugButton.addEventListener("click", () => {
@@ -206,6 +209,7 @@ export const createUi = (data: UiData): UiController => {
       startPanel.classList.add("hidden");
       startPanel.style.display = "none";
       mechLogPanel.style.display = "block";
+      mechLogPanel.style.visibility = "visible";
     },
     showStart: () => {
       startPanel.classList.remove("hidden");
@@ -213,6 +217,7 @@ export const createUi = (data: UiData): UiController => {
       resultPanel.classList.add("hidden");
       resultPanel.style.display = "none";
       mechLogPanel.style.display = "none";
+      mechLogPanel.style.visibility = "hidden";
     },
     hideResult: () => {
       resultPanel.classList.add("hidden");
@@ -222,6 +227,7 @@ export const createUi = (data: UiData): UiController => {
       resultPanel.classList.remove("hidden");
       resultPanel.style.display = "flex";
       mechLogPanel.style.display = "none";
+      mechLogPanel.style.visibility = "hidden";
     },
     getConfig,
     setToast,

@@ -197,6 +197,7 @@ body.is-debug {
   overflow: hidden;
   z-index: 25;
   pointer-events: none;
+  visibility: hidden;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   font-size: 10px;
   line-height: 1.25;
