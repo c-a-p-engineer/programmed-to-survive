@@ -27,10 +27,10 @@ export const startBattle = (loadout: BattleLoadout, hooks: UiHooks): GameHandle 
     // Top: score/wave/time. Bottom: mech stats.
     var cam = scene.cameras.main;
     var W = cam.width, H = cam.height;
-    var pad = 4;
+    var pad = Math.max(4, Math.round(Math.min(W, H) * 0.02));
     var topY = 0;
-    var topH = 56;
-    var bottomH = 118;
+    var topH = Math.max(48, Math.round(H * 0.09));
+    var bottomH = Math.max(120, Math.round(H * 0.2));
     var bottomY = H - bottomH;
 
     // top plate
@@ -47,13 +47,9 @@ export const startBattle = (loadout: BattleLoadout, hooks: UiHooks): GameHandle 
     var mm = String(Math.floor(sec/60)).padStart(2,"0");
     var ss = String(sec%60).padStart(2,"0");
 
-    if(scene.scoreText){
-      scene.scoreText.setText("SCORE " + String(state.score|0));
-      scene.scoreText.setPosition(0, 0);
-    }
     if(scene.waveTimeText){
-      scene.waveTimeText.setText("WAVE " + String(state.wave||1) + "   TIME " + mm + ":" + ss);
-      scene.waveTimeText.setPosition(pad + 4, topY + 10);
+      scene.waveTimeText.setText("W" + String(state.wave||1) + "  " + mm + ":" + ss);
+      scene.waveTimeText.setPosition(pad + 2, topY + pad);
     }
 
     // bottom plate (mech info)
@@ -78,60 +74,55 @@ export const startBattle = (loadout: BattleLoadout, hooks: UiHooks): GameHandle 
       scene.mechInfoText.setPosition(pad + 4, bottomY + bottomH - 10);
     }
 
-    if(scene.hpText){
+    if(scene.hpGroup){
       var hp = Math.max(0, state.hp|0), mhp = Math.max(1, state.hpMax ?? state.maxHp ?? 1);
-      scene.hpText.setText("HP " + hp + "/" + mhp);
-      scene.hpText.setPosition(pad + 4, bottomY + 12);
-    }
-    if(scene.expText){
       var exp = Math.max(0, (state.exp ?? state.score ?? 0)|0);
+      scene.hpText.setText("HP " + hp + "/" + mhp);
       scene.expText.setText("EXP " + exp);
-      scene.expText.setPosition(pad + 4, bottomY + 36);
+      scene.hpText.setPosition(0, 0);
+      scene.expText.setPosition(0, 30);
+      scene.hpGroup.setPosition(pad + 2, bottomY + pad);
+      if(scene.hpBarG && scene.expBarG){
+        var barW = Math.max(140, Math.round(W * 0.34));
+        scene.hpBarG.clear();
+        scene.hpBarG.fillStyle(0xffffff, 0.12);
+        scene.hpBarG.fillRoundedRect(0, 22, barW, 12, 6);
+        scene.hpBarG.fillStyle(0x00ffcc, 0.8);
+        scene.hpBarG.fillRoundedRect(0, 22, Math.max(6, barW * clamp(hp / mhp, 0, 1)), 12, 6);
+        scene.expBarG.clear();
+        scene.expBarG.fillStyle(0xffffff, 0.08);
+        scene.expBarG.fillRoundedRect(0, 52, barW, 8, 5);
+        scene.expBarG.fillStyle(0xffd36b, 0.55);
+        scene.expBarG.fillRoundedRect(0, 52, Math.max(6, barW * clamp((exp % 100) / 100, 0, 1)), 8, 5);
+      }
     }
 
-    if(scene.barG){
-      scene.barG.clear();
-      var barX = pad + 4;
-      var barY = bottomY + 62;
-      var bw = W - (pad * 2) - 8;
-      var bh = 10;
-      var hpR = clamp(state.hp / (state.hpMax || 1), 0, 1);
-      scene.barG.fillStyle(0xffffff, 0.12);
-      scene.barG.fillRoundedRect(barX, barY, bw, bh, 6);
-      scene.barG.fillStyle(0x00ffcc, 0.6);
-      scene.barG.fillRoundedRect(barX, barY, Math.max(4, bw * hpR), bh, 6);
-      var enR = clamp(state.en / (state.enMax || 1), 0, 1);
-      scene.barG.fillStyle(0xffffff, 0.1);
-      scene.barG.fillRoundedRect(barX, barY + 14, bw, bh, 6);
-      scene.barG.fillStyle(0x66aaff, 0.6);
-      scene.barG.fillRoundedRect(barX, barY + 14, Math.max(4, bw * enR), bh, 6);
-    }
-
-    if(scene.weaponMainText){
+    if(scene.weaponGroup){
       var waName = state.cfg.wpnA ? state.cfg.wpnA.name : "A";
-      scene.weaponMainText.setText("MAIN " + waName);
-      scene.weaponMainText.setPosition(pad + 34, bottomY + 82);
-    }
-    if(scene.weaponSubText){
       var wbName = state.cfg.wpnB ? state.cfg.wpnB.name : "B";
-      scene.weaponSubText.setText("SUB " + wbName);
-      scene.weaponSubText.setPosition(pad + 34, bottomY + 100);
+      var trunc = function(name: string): string{
+        return name.length > 16 ? name.slice(0, 15) + "…" : name;
+      };
+      scene.weaponMainText.setText("MAIN " + trunc(waName));
+      scene.weaponSubText.setText("SUB " + trunc(wbName));
+      scene.weaponMainText.setPosition(24, 0);
+      scene.weaponSubText.setPosition(24, 22);
+      scene.weaponGroup.setPosition(W - pad - 170, bottomY + pad);
+      if(scene.weaponG){
+        scene.weaponG.clear();
+        scene.weaponG.fillStyle(0x00ffcc, 0.9);
+        scene.weaponG.fillRoundedRect(0, 2, 16, 16, 4);
+        scene.weaponG.fillStyle(0x66aaff, 0.9);
+        scene.weaponG.fillRoundedRect(0, 24, 16, 16, 4);
+      }
     }
 
-    if(scene.weaponG){
-      scene.weaponG.clear();
-      var iconX = pad + 4;
-      var iconSize = 18;
-      scene.weaponG.fillStyle(0x00ffcc, 0.85);
-      scene.weaponG.fillRoundedRect(iconX, bottomY + 80, iconSize, iconSize, 4);
-      scene.weaponG.fillStyle(0x66aaff, 0.85);
-      scene.weaponG.fillRoundedRect(iconX, bottomY + 98, iconSize, iconSize, 4);
-    }
-
-    if(scene.scorePanelG && scene.scoreText){
+    if(scene.scorePanelG && scene.scoreLabelText && scene.scoreValueText){
+      scene.scoreLabelText.setText("SCORE");
+      scene.scoreValueText.setText(String(state.score|0));
       var scorePad = 8;
-      var scoreW = scene.scoreText.width + scorePad * 2;
-      var scoreH = scene.scoreText.height + 10;
+      var scoreW = Math.max(scene.scoreLabelText.width, scene.scoreValueText.width) + scorePad * 2;
+      var scoreH = scene.scoreLabelText.height + scene.scoreValueText.height + 8;
       var scoreX = W - scoreW - 2;
       var scoreY = topY + 2;
       scene.scorePanelG.clear();
@@ -139,15 +130,29 @@ export const startBattle = (loadout: BattleLoadout, hooks: UiHooks): GameHandle 
       scene.scorePanelG.fillRoundedRect(scoreX, scoreY, scoreW, scoreH, 12);
       scene.scorePanelG.lineStyle(2, 0x00ffcc, 0.2);
       scene.scorePanelG.strokeRoundedRect(scoreX, scoreY, scoreW, scoreH, 12);
-      scene.scoreText.setPosition(scoreX + scorePad, scoreY + 4);
+      scene.scoreLabelText.setPosition(scoreX + scorePad, scoreY + 4);
+      scene.scoreValueText.setPosition(scoreX + scorePad, scoreY + 4 + scene.scoreLabelText.height);
     }
 
     if(scene.radarG){
-      var radarR = Math.round(Math.min(60, Math.max(44, W * 0.16)));
+      var radarR = Math.round(Math.min(56, Math.max(42, W * 0.15)));
       scene.radarR = radarR;
-      scene.radarX = W - radarR - 16;
-      scene.radarY = bottomY - radarR - 14;
+      scene.radarX = W - radarR - pad - 2;
+      scene.radarY = bottomY - radarR - pad - 8;
     }
+
+    if(scene.prevScore !== (state.score|0)){
+      scene.prevScore = (state.score|0);
+      if(scene.scoreValueText){
+        scene.tweens.add({targets: scene.scoreValueText, scale: 1.12, duration: 120, yoyo: true, ease: "Quad.out"});
+      }
+    }
+    if(scene.prevHp != null && (state.hp|0) < (scene.prevHp|0)){
+      if(scene.hpGroup){
+        scene.tweens.add({targets: scene.hpGroup, alpha: 0.4, duration: 120, yoyo: true, repeat: 1});
+      }
+    }
+    scene.prevHp = (state.hp|0);
 
     // expose time to DOM log
     state.battleTimeMs = ms;
@@ -965,13 +970,18 @@ export const startBattle = (loadout: BattleLoadout, hooks: UiHooks): GameHandle 
           }
         }      // HUD elements (high readability)
         self.scorePanelG = self.add.graphics().setScrollFactor(0).setDepth(11);
-        self.scoreText = self.add.text(0,0,"SCORE 0", {fontFamily:"system-ui, sans-serif",fontSize:"20px",fontStyle:"700",fill:"#e8eefc",stroke:"#000",strokeThickness:4}).setScrollFactor(0).setDepth(12);
-        self.waveTimeText = self.add.text(0,0,"WAVE 1  TIME 00:00", {fontFamily:"system-ui, sans-serif",fontSize:"15px",fontStyle:"700",fill:"#e8eefc",stroke:"#000",strokeThickness:3}).setScrollFactor(0).setDepth(12);
-        self.hpText = self.add.text(0,0,"HP 0/0", {fontFamily:"system-ui, sans-serif",fontSize:"16px",fontStyle:"700",fill:"#e8eefc",stroke:"#000",strokeThickness:3}).setScrollFactor(0).setDepth(12);
-        self.expText = self.add.text(0,0,"EXP 0", {fontFamily:"system-ui, sans-serif",fontSize:"15px",fontStyle:"700",fill:"#ffd36b",stroke:"#000",strokeThickness:3}).setScrollFactor(0).setDepth(12);
+        self.scoreLabelText = self.add.text(0,0,"SCORE", {fontFamily:"system-ui, sans-serif",fontSize:"12px",fontStyle:"700",fill:"#b8c6ff",stroke:"#000",strokeThickness:3}).setScrollFactor(0).setDepth(12);
+        self.scoreValueText = self.add.text(0,0,"0", {fontFamily:"system-ui, sans-serif",fontSize:"22px",fontStyle:"700",fill:"#e8eefc",stroke:"#000",strokeThickness:4}).setScrollFactor(0).setDepth(12);
+        self.waveTimeText = self.add.text(0,0,"W1  00:00", {fontFamily:"system-ui, sans-serif",fontSize:"15px",fontStyle:"700",fill:"#e8eefc",stroke:"#000",strokeThickness:3}).setScrollFactor(0).setDepth(12);
+        self.hpText = self.add.text(0,0,"HP 0/0", {fontFamily:"system-ui, sans-serif",fontSize:"18px",fontStyle:"700",fill:"#e8eefc",stroke:"#000",strokeThickness:3}).setScrollFactor(0).setDepth(12);
+        self.expText = self.add.text(0,0,"EXP 0", {fontFamily:"system-ui, sans-serif",fontSize:"14px",fontStyle:"700",fill:"#ffd36b",stroke:"#000",strokeThickness:3}).setScrollFactor(0).setDepth(12);
+        self.hpBarG = self.add.graphics().setScrollFactor(0).setDepth(11);
+        self.expBarG = self.add.graphics().setScrollFactor(0).setDepth(11);
+        self.hpGroup = self.add.container(0,0,[self.hpText, self.expText, self.hpBarG, self.expBarG]).setScrollFactor(0).setDepth(12);
         self.weaponMainText = self.add.text(0,0,"MAIN", {fontFamily:"system-ui, sans-serif",fontSize:"13px",fill:"#e8eefc",stroke:"#000",strokeThickness:3}).setScrollFactor(0).setDepth(12);
         self.weaponSubText = self.add.text(0,0,"SUB", {fontFamily:"system-ui, sans-serif",fontSize:"13px",fill:"#e8eefc",stroke:"#000",strokeThickness:3}).setScrollFactor(0).setDepth(12);
         self.weaponG = self.add.graphics().setScrollFactor(0).setDepth(12);
+        self.weaponGroup = self.add.container(0,0,[self.weaponG, self.weaponMainText, self.weaponSubText]).setScrollFactor(0).setDepth(12);
 
 
         // HUD + bars

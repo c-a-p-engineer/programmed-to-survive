@@ -220,9 +220,13 @@ a{ color:inherit; }
   border: 1px solid rgba(255,255,255,.12);
   text-align: right;
 }
-.hud .hud-score .combo{
-  font-size: 12px;
-  color: #9fffe9;
+.hud .hud-score .label{
+  font-size: 11px;
+  color: #b8c6ff;
+}
+.hud .hud-score .value{
+  font-size: 20px;
+  color: #e8eefc;
 }
 .hud .hud-bottom{
   position:absolute;

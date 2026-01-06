@@ -77,7 +77,7 @@ export const createUi = (data: UiData): UiController => {
     mechLogPanel.style.display = "block";
     const cls = `c-${type ?? "sys"}`;
     mechLog.push({ t: timeMs | 0, cls, msg });
-    if (mechLog.length > 10) mechLog.shift();
+    if (mechLog.length > 5) mechLog.shift();
     const minLines = 5;
     const lines = mechLog.map((line, idx) => {
       const ageCls = idx === mechLog.length - 1 ? "is-latest" : "is-old";
@@ -87,6 +87,14 @@ export const createUi = (data: UiData): UiController => {
       lines.push("<div class='line placeholder'>&nbsp;</div>");
     }
     mechLogLines.innerHTML = lines.join("");
+    mechLogPanel.style.opacity = "0";
+    requestAnimationFrame(() => {
+      mechLogPanel.style.opacity = "0.8";
+    });
+    window.clearTimeout((mechLogPanel as any).__fadeTimer);
+    (mechLogPanel as any).__fadeTimer = window.setTimeout(() => {
+      mechLogPanel.style.opacity = "0.35";
+    }, 2500);
   };
 
   const fillSelect = (select: HTMLSelectElement, items: { id: string; name: string }[]): void => {
