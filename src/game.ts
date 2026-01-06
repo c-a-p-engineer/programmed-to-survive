@@ -27,19 +27,20 @@ export const startBattle = (loadout: BattleLoadout, hooks: UiHooks): GameHandle 
     // Top: score/wave/time. Bottom: mech stats.
     var cam = scene.cameras.main;
     var W = cam.width, H = cam.height;
-    var pad = Math.max(4, Math.round(Math.min(W, H) * 0.02));
+    var pad = Math.max(2, Math.round(Math.min(W, H) * 0.015));
+    var edge = 2;
     var topY = 0;
-    var topH = Math.max(44, Math.round(H * 0.07));
-    var bottomH = Math.max(108, Math.round(H * 0.17));
+    var topH = Math.max(40, Math.round(H * 0.065));
+    var bottomH = Math.max(96, Math.round(H * 0.15));
     var bottomY = H - bottomH;
 
     // top plate
     if(scene.topPanelG){
       scene.topPanelG.clear();
       scene.topPanelG.fillStyle(0x000000, 0.62);
-      scene.topPanelG.fillRoundedRect(2, topY, W-4, topH, 12);
+      scene.topPanelG.fillRoundedRect(edge, topY, W - edge * 2, topH, 10);
       scene.topPanelG.lineStyle(2, 0x00ffcc, 0.18);
-      scene.topPanelG.strokeRoundedRect(2, topY, W-4, topH, 12);
+      scene.topPanelG.strokeRoundedRect(edge, topY, W - edge * 2, topH, 10);
     }
 
     var ms = Math.floor((tSec||0)*1000);
@@ -49,7 +50,7 @@ export const startBattle = (loadout: BattleLoadout, hooks: UiHooks): GameHandle 
 
     if(scene.waveTimeText){
       scene.waveTimeText.setText("W" + String(state.wave||1) + "  " + mm + ":" + ss);
-      scene.waveTimeText.setPosition(pad + 2, topY + pad);
+      scene.waveTimeText.setPosition(edge + pad, topY + pad);
     }
 
     // bottom plate (mech info)
@@ -81,9 +82,9 @@ export const startBattle = (loadout: BattleLoadout, hooks: UiHooks): GameHandle 
       scene.expText.setText("EXP " + exp);
       scene.hpText.setPosition(0, 0);
       scene.expText.setPosition(0, 30);
-      scene.hpGroup.setPosition(pad + 2, bottomY + pad);
+      scene.hpGroup.setPosition(edge + pad, bottomY + pad);
       if(scene.hpBarG && scene.expBarG){
-        var barW = Math.max(140, Math.round(W * 0.34));
+        var barW = Math.max(128, Math.round(W * 0.32));
         scene.hpBarG.clear();
         scene.hpBarG.fillStyle(0xffffff, 0.12);
         scene.hpBarG.fillRoundedRect(0, 22, barW, 12, 6);
@@ -107,7 +108,7 @@ export const startBattle = (loadout: BattleLoadout, hooks: UiHooks): GameHandle 
       scene.weaponSubText.setText("SUB " + trunc(wbName));
       scene.weaponMainText.setPosition(24, 0);
       scene.weaponSubText.setPosition(24, 22);
-      scene.weaponGroup.setPosition(W - pad - 156, bottomY + pad);
+      scene.weaponGroup.setPosition(W - edge - pad - 150, bottomY + pad);
       if(scene.weaponG){
         scene.weaponG.clear();
         scene.weaponG.fillStyle(0x00ffcc, 0.9);
@@ -123,8 +124,8 @@ export const startBattle = (loadout: BattleLoadout, hooks: UiHooks): GameHandle 
       var scorePad = 8;
       var scoreW = Math.max(scene.scoreLabelText.width, scene.scoreValueText.width) + scorePad * 2;
       var scoreH = scene.scoreLabelText.height + scene.scoreValueText.height + 8;
-      var scoreX = W - scoreW - pad;
-      var scoreY = topY + pad;
+      var scoreX = W - scoreW - edge;
+      var scoreY = topY + edge;
       scene.scorePanelG.clear();
       scene.scorePanelG.fillStyle(0x000000, 0.62);
       scene.scorePanelG.fillRoundedRect(scoreX, scoreY, scoreW, scoreH, 12);
@@ -135,10 +136,10 @@ export const startBattle = (loadout: BattleLoadout, hooks: UiHooks): GameHandle 
     }
 
     if(scene.radarG){
-      var radarR = Math.round(Math.min(52, Math.max(40, W * 0.14)));
+      var radarR = Math.round(Math.min(48, Math.max(36, W * 0.13)));
       scene.radarR = radarR;
-      scene.radarX = W - radarR - pad - 2;
-      scene.radarY = bottomY - radarR - pad - 6;
+      scene.radarX = W - radarR - edge - pad;
+      scene.radarY = bottomY - radarR - pad - 4;
     }
 
     if(scene.prevScore !== (state.score|0)){

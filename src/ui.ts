@@ -62,6 +62,20 @@ export const createUi = (data: UiData): UiController => {
   document.body.classList.toggle("is-debug", debugEnabled);
   debugButton.style.display = debugEnabled ? "block" : "none";
 
+  const renderMechLog = (): void => {
+    const minLines = 5;
+    const lines = mechLog.map((line, idx) => {
+      const ageCls = idx === mechLog.length - 1 ? "is-latest" : "is-old";
+      return `<div class='line ${line.cls} ${ageCls}'>${fmtHMSms(line.t)} ${escapeHtml(line.msg)}</div>`;
+    });
+    while (lines.length < minLines) {
+      lines.push("<div class='line placeholder'>&nbsp;</div>");
+    }
+    mechLogLines.innerHTML = lines.join("");
+  };
+  mechLogPanel.style.display = "block";
+  renderMechLog();
+
   const setDebug = (message: string): void => {
     const t = new Date().toISOString().slice(11, 19);
     debugLines.push(`[${t}] ${message}`);
@@ -78,15 +92,7 @@ export const createUi = (data: UiData): UiController => {
     const cls = `c-${type ?? "sys"}`;
     mechLog.push({ t: timeMs | 0, cls, msg });
     if (mechLog.length > 5) mechLog.shift();
-    const minLines = 5;
-    const lines = mechLog.map((line, idx) => {
-      const ageCls = idx === mechLog.length - 1 ? "is-latest" : "is-old";
-      return `<div class='line ${line.cls} ${ageCls}'>${fmtHMSms(line.t)} ${escapeHtml(line.msg)}</div>`;
-    });
-    while (lines.length < minLines) {
-      lines.push("<div class='line placeholder'>&nbsp;</div>");
-    }
-    mechLogLines.innerHTML = lines.join("");
+    renderMechLog();
     mechLogPanel.style.opacity = "0";
     requestAnimationFrame(() => {
       mechLogPanel.style.opacity = "0.8";
