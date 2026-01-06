@@ -29,17 +29,17 @@ export const startBattle = (loadout: BattleLoadout, hooks: UiHooks): GameHandle 
     var W = cam.width, H = cam.height;
     var pad = Math.max(4, Math.round(Math.min(W, H) * 0.02));
     var topY = 0;
-    var topH = Math.max(48, Math.round(H * 0.09));
-    var bottomH = Math.max(120, Math.round(H * 0.2));
+    var topH = Math.max(44, Math.round(H * 0.07));
+    var bottomH = Math.max(108, Math.round(H * 0.17));
     var bottomY = H - bottomH;
 
     // top plate
     if(scene.topPanelG){
       scene.topPanelG.clear();
       scene.topPanelG.fillStyle(0x000000, 0.62);
-      scene.topPanelG.fillRoundedRect(2, topY, W-4, topH, 14);
+      scene.topPanelG.fillRoundedRect(2, topY, W-4, topH, 12);
       scene.topPanelG.lineStyle(2, 0x00ffcc, 0.18);
-      scene.topPanelG.strokeRoundedRect(2, topY, W-4, topH, 14);
+      scene.topPanelG.strokeRoundedRect(2, topY, W-4, topH, 12);
     }
 
     var ms = Math.floor((tSec||0)*1000);
@@ -107,7 +107,7 @@ export const startBattle = (loadout: BattleLoadout, hooks: UiHooks): GameHandle 
       scene.weaponSubText.setText("SUB " + trunc(wbName));
       scene.weaponMainText.setPosition(24, 0);
       scene.weaponSubText.setPosition(24, 22);
-      scene.weaponGroup.setPosition(W - pad - 170, bottomY + pad);
+      scene.weaponGroup.setPosition(W - pad - 156, bottomY + pad);
       if(scene.weaponG){
         scene.weaponG.clear();
         scene.weaponG.fillStyle(0x00ffcc, 0.9);
@@ -123,8 +123,8 @@ export const startBattle = (loadout: BattleLoadout, hooks: UiHooks): GameHandle 
       var scorePad = 8;
       var scoreW = Math.max(scene.scoreLabelText.width, scene.scoreValueText.width) + scorePad * 2;
       var scoreH = scene.scoreLabelText.height + scene.scoreValueText.height + 8;
-      var scoreX = W - scoreW - 2;
-      var scoreY = topY + 2;
+      var scoreX = W - scoreW - pad;
+      var scoreY = topY + pad;
       scene.scorePanelG.clear();
       scene.scorePanelG.fillStyle(0x000000, 0.62);
       scene.scorePanelG.fillRoundedRect(scoreX, scoreY, scoreW, scoreH, 12);
@@ -135,10 +135,10 @@ export const startBattle = (loadout: BattleLoadout, hooks: UiHooks): GameHandle 
     }
 
     if(scene.radarG){
-      var radarR = Math.round(Math.min(56, Math.max(42, W * 0.15)));
+      var radarR = Math.round(Math.min(52, Math.max(40, W * 0.14)));
       scene.radarR = radarR;
       scene.radarX = W - radarR - pad - 2;
-      scene.radarY = bottomY - radarR - pad - 8;
+      scene.radarY = bottomY - radarR - pad - 6;
     }
 
     if(scene.prevScore !== (state.score|0)){
@@ -972,7 +972,7 @@ export const startBattle = (loadout: BattleLoadout, hooks: UiHooks): GameHandle 
         self.scorePanelG = self.add.graphics().setScrollFactor(0).setDepth(11);
         self.scoreLabelText = self.add.text(0,0,"SCORE", {fontFamily:"system-ui, sans-serif",fontSize:"12px",fontStyle:"700",fill:"#b8c6ff",stroke:"#000",strokeThickness:3}).setScrollFactor(0).setDepth(12);
         self.scoreValueText = self.add.text(0,0,"0", {fontFamily:"system-ui, sans-serif",fontSize:"22px",fontStyle:"700",fill:"#e8eefc",stroke:"#000",strokeThickness:4}).setScrollFactor(0).setDepth(12);
-        self.waveTimeText = self.add.text(0,0,"W1  00:00", {fontFamily:"system-ui, sans-serif",fontSize:"15px",fontStyle:"700",fill:"#e8eefc",stroke:"#000",strokeThickness:3}).setScrollFactor(0).setDepth(12);
+        self.waveTimeText = self.add.text(0,0,"W1  00:00", {fontFamily:"system-ui, sans-serif",fontSize:"14px",fontStyle:"700",fill:"#e8eefc",stroke:"#000",strokeThickness:3}).setScrollFactor(0).setDepth(12);
         self.hpText = self.add.text(0,0,"HP 0/0", {fontFamily:"system-ui, sans-serif",fontSize:"18px",fontStyle:"700",fill:"#e8eefc",stroke:"#000",strokeThickness:3}).setScrollFactor(0).setDepth(12);
         self.expText = self.add.text(0,0,"EXP 0", {fontFamily:"system-ui, sans-serif",fontSize:"14px",fontStyle:"700",fill:"#ffd36b",stroke:"#000",strokeThickness:3}).setScrollFactor(0).setDepth(12);
         self.hpBarG = self.add.graphics().setScrollFactor(0).setDepth(11);
