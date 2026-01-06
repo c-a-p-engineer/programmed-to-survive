@@ -190,9 +190,9 @@ body.is-debug {
 #mechLogPanel {
   position: absolute;
   right: 6px;
-  bottom: clamp(120px, 18vh, 180px);
-  width: clamp(180px, 30vw, 240px);
-  max-height: clamp(84px, 16vh, 140px);
+  bottom: clamp(140px, 20vh, 220px);
+  width: clamp(170px, 26vw, 220px);
+  max-height: clamp(84px, 14vh, 128px);
   min-height: 84px;
   overflow: hidden;
   z-index: 25;

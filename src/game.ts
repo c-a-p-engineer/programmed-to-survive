@@ -140,9 +140,10 @@ export const startBattle = (loadout: BattleLoadout, hooks: UiHooks): GameHandle 
 
     if(scene.radarG){
       var radarR = Math.round(Math.min(48, Math.max(36, W * 0.13)));
+      var logSafeW = Math.round(Math.min(240, Math.max(170, W * 0.3)));
       scene.radarR = radarR;
-      scene.radarX = W - radarR - edge - pad;
-      scene.radarY = bottomY - radarR - pad - 4;
+      scene.radarX = W - logSafeW - radarR - edge - pad;
+      scene.radarY = bottomY - radarR - pad - 8;
     }
 
     if(scene.prevScore !== (state.score|0)){
@@ -306,6 +307,7 @@ export const startBattle = (loadout: BattleLoadout, hooks: UiHooks): GameHandle 
         lastDelta: 0,
         dead: false
       };
+      var obKeys = ["obA","obB","obC"];
 
       function preload(this: any): void{
         makeTri(this, "p", 30, 0x00ffcc);
@@ -330,6 +332,7 @@ export const startBattle = (loadout: BattleLoadout, hooks: UiHooks): GameHandle 
           self.radarRange = 900;
         }
         state.t0 = self.time.now;
+        state.startMs = self.time.now;
 
         // world bounds (big)
         self.physics.world.setBounds(-4000,-4000,8000,8000);
@@ -362,13 +365,12 @@ export const startBattle = (loadout: BattleLoadout, hooks: UiHooks): GameHandle 
         for(var k=0;k<6;k++) spawnEnemyNow();
         dbg("spawn init enemies=" + self.enemies.getChildren().length);
         self.obsSpawnAcc = 0;
-        self.obsSpawnInterval = 2.2; // seconds
+        self.obsSpawnInterval = 2.4; // seconds
 
 
         self.bullets = self.physics.add.group();
         self.mines = self.physics.add.group();      // obstacles (collidable) to make movement obvious
         self.obstacles = self.physics.add.staticGroup();
-        var obKeys = ["obA","obB","obC"];
         for(var oi=0; oi<25; oi++){
           var a = Math.random()*Math.PI*2;
           var d = 280 + Math.random()*1400;
@@ -724,6 +726,12 @@ export const startBattle = (loadout: BattleLoadout, hooks: UiHooks): GameHandle 
 
         var ms = (self.mines && self.mines.getChildren) ? self.mines.getChildren() : [];
         var obsArr = (self.obstacles && self.obstacles.getChildren) ? self.obstacles.getChildren() : [];
+        var shouldUpdateVisibility = false;
+        state.losAcc = (state.losAcc || 0) + delta;
+        if(state.losAcc >= 140){
+          state.losAcc = 0;
+          shouldUpdateVisibility = true;
+        }
 
         
   // OBSTACLE SPAWN TICK (respect density cap)
@@ -744,19 +752,16 @@ export const startBattle = (loadout: BattleLoadout, hooks: UiHooks): GameHandle 
         var d = 360 + Math.random()*560;
         var x = self.player.x + Math.cos(a)*d;
         var y = self.player.y + Math.sin(a)*d;
-        var w = 70 + Math.random()*160;
-        var h = 50 + Math.random()*150;
-        var ob = self.obstacles.create(x, y, "ob");
+        var key = obKeys[(Math.random()*obKeys.length)|0];
+        var ob = self.obstacles.create(x, y, key);
         ob.setImmovable(true);
         if(ob.body && typeof ob.body.setAllowGravity === "function"){
           ob.body.setAllowGravity(false);
         }
-        if(ob.body && typeof ob.body.setSize === "function"){
-          ob.body.setSize(w, h, true);
-        }
-        ob.displayWidth = w; ob.displayHeight = h;
+        var scale = 0.8 + Math.random() * 0.6;
+        ob.setScale(scale);
         // HP by size
-        var maxHp = Math.max(30, Math.floor((w*h)/10));
+        var maxHp = Math.max(30, Math.floor((ob.displayWidth*ob.displayHeight)/10));
         ob.setData("maxHp", maxHp);
         ob.setData("hp", maxHp);
         ob.setAlpha(0.55);
@@ -788,12 +793,14 @@ export const startBattle = (loadout: BattleLoadout, hooks: UiHooks): GameHandle 
         state.targetDist = (tgt && tgt.active) ? Math.floor(Phaser.Math.Distance.Between(self.player.x, self.player.y, tgt.x, tgt.y)) : 0;
 
         // line of sight visibility: enemies behind obstacles are not directly visible
-        for(var vi=0; vi<es.length; vi++){
-          var ev = es[vi];
-          if(!ev.active) continue;
-          var blocked = losBlocked(self, self.player.x, self.player.y, ev.x, ev.y);
-          ev.setAlpha(blocked ? 0.18 : 1.0);
-          ev.setData("blocked", blocked);
+        if(shouldUpdateVisibility){
+          for(var vi=0; vi<es.length; vi++){
+            var ev = es[vi];
+            if(!ev.active) continue;
+            var blocked = losBlocked(self, self.player.x, self.player.y, ev.x, ev.y);
+            ev.setAlpha(blocked ? 0.18 : 1.0);
+            ev.setData("blocked", blocked);
+          }
         }
         // keep target even if blocked; weapons will respect LOS (non-piercing won't fire)
 
