@@ -73,7 +73,7 @@ export const createUi = (data: UiData): UiController => {
     }
     mechLogLines.innerHTML = lines.join("");
   };
-  mechLogPanel.style.display = "block";
+  mechLogPanel.style.display = "none";
   renderMechLog();
 
   const setDebug = (message: string): void => {
@@ -196,10 +196,19 @@ export const createUi = (data: UiData): UiController => {
   return {
     onStart: (handler) => btnStart.addEventListener("click", handler),
     onRetry: (handler) => btnRetry.addEventListener("click", handler),
-    hideStart: () => startPanel.classList.add("hidden"),
-    showStart: () => startPanel.classList.remove("hidden"),
+    hideStart: () => {
+      startPanel.classList.add("hidden");
+      mechLogPanel.style.display = "block";
+    },
+    showStart: () => {
+      startPanel.classList.remove("hidden");
+      mechLogPanel.style.display = "none";
+    },
     hideResult: () => resultPanel.classList.add("hidden"),
-    showResultPanel: () => resultPanel.classList.remove("hidden"),
+    showResultPanel: () => {
+      resultPanel.classList.remove("hidden");
+      mechLogPanel.style.display = "none";
+    },
     getConfig,
     setToast,
     setDebug,
