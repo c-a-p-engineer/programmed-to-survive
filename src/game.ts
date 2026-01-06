@@ -50,11 +50,6 @@ export const startBattle = (loadout: BattleLoadout, hooks: UiHooks): GameHandle 
       scene.waveTimeText.setVisible(true);
       scene.waveTimeText.setAlpha(1);
     }
-    if(scene.uiLayer){
-      scene.uiLayer.setVisible(true);
-      scene.uiLayer.setAlpha(1);
-      scene.uiLayer.setPosition(0, 0);
-    }
 
     // bottom plate (mech info)
     if(scene.bottomPanelG){
@@ -975,30 +970,20 @@ export const startBattle = (loadout: BattleLoadout, hooks: UiHooks): GameHandle 
             self.radarG.fillCircle(sx, sy, blocked ? 2 : 2.5);
           }
         }      // HUD elements (high readability)
-        var hudDepth = 200;
-        self.scorePanelG = self.add.graphics().setScrollFactor(0);
-        self.scoreLabelText = self.add.text(0,0,"SCORE", {fontFamily:"system-ui, sans-serif",fontSize:"12px",fontStyle:"700",fill:"#b8c6ff",stroke:"#000",strokeThickness:3}).setScrollFactor(0);
-        self.scoreValueText = self.add.text(0,0,"0", {fontFamily:"system-ui, sans-serif",fontSize:"22px",fontStyle:"700",fill:"#e8eefc",stroke:"#000",strokeThickness:4}).setScrollFactor(0);
-        self.waveTimeText = self.add.text(0,0,"W1  00:00", {fontFamily:"system-ui, sans-serif",fontSize:"14px",fontStyle:"700",fill:"#e8eefc",stroke:"#000",strokeThickness:3}).setScrollFactor(0);
-        self.hpText = self.add.text(0,0,"HP 0/0", {fontFamily:"system-ui, sans-serif",fontSize:"18px",fontStyle:"700",fill:"#e8eefc",stroke:"#000",strokeThickness:3}).setScrollFactor(0);
-        self.expText = self.add.text(0,0,"EXP 0", {fontFamily:"system-ui, sans-serif",fontSize:"14px",fontStyle:"700",fill:"#ffd36b",stroke:"#000",strokeThickness:3}).setScrollFactor(0);
-        self.hpBarG = self.add.graphics().setScrollFactor(0);
-        self.expBarG = self.add.graphics().setScrollFactor(0);
-        self.hpGroup = self.add.container(0,0,[self.hpText, self.expText, self.hpBarG, self.expBarG]);
-        self.weaponMainText = self.add.text(0,0,"MAIN", {fontFamily:"system-ui, sans-serif",fontSize:"13px",fill:"#e8eefc",stroke:"#000",strokeThickness:3}).setScrollFactor(0);
-        self.weaponSubText = self.add.text(0,0,"SUB", {fontFamily:"system-ui, sans-serif",fontSize:"13px",fill:"#e8eefc",stroke:"#000",strokeThickness:3}).setScrollFactor(0);
-        self.weaponG = self.add.graphics().setScrollFactor(0);
-        self.weaponGroup = self.add.container(0,0,[self.weaponG, self.weaponMainText, self.weaponSubText]);
-        self.uiLayer = self.add.container(0,0,[
-          self.scorePanelG,
-          self.scoreLabelText,
-          self.scoreValueText,
-          self.waveTimeText,
-          self.hpGroup,
-          self.weaponGroup
-        ]).setScrollFactor(0).setDepth(hudDepth);
-        self.hpGroup.setScrollFactor(0);
-        self.weaponGroup.setScrollFactor(0);
+        var hudDepth = 1000;
+        self.scorePanelG = self.add.graphics().setScrollFactor(0).setDepth(hudDepth);
+        self.scoreLabelText = self.add.text(0,0,"SCORE", {fontFamily:"system-ui, sans-serif",fontSize:"12px",fontStyle:"700",fill:"#b8c6ff",stroke:"#000",strokeThickness:3}).setScrollFactor(0).setDepth(hudDepth + 1);
+        self.scoreValueText = self.add.text(0,0,"0", {fontFamily:"system-ui, sans-serif",fontSize:"22px",fontStyle:"700",fill:"#e8eefc",stroke:"#000",strokeThickness:4}).setScrollFactor(0).setDepth(hudDepth + 1);
+        self.waveTimeText = self.add.text(0,0,"W1  00:00", {fontFamily:"system-ui, sans-serif",fontSize:"14px",fontStyle:"700",fill:"#e8eefc",stroke:"#000",strokeThickness:3}).setScrollFactor(0).setDepth(hudDepth + 1);
+        self.hpText = self.add.text(0,0,"HP 0/0", {fontFamily:"system-ui, sans-serif",fontSize:"18px",fontStyle:"700",fill:"#e8eefc",stroke:"#000",strokeThickness:3}).setScrollFactor(0).setDepth(hudDepth + 1);
+        self.expText = self.add.text(0,0,"EXP 0", {fontFamily:"system-ui, sans-serif",fontSize:"14px",fontStyle:"700",fill:"#ffd36b",stroke:"#000",strokeThickness:3}).setScrollFactor(0).setDepth(hudDepth + 1);
+        self.hpBarG = self.add.graphics().setScrollFactor(0).setDepth(hudDepth);
+        self.expBarG = self.add.graphics().setScrollFactor(0).setDepth(hudDepth);
+        self.hpGroup = self.add.container(0,0,[self.hpText, self.expText, self.hpBarG, self.expBarG]).setScrollFactor(0).setDepth(hudDepth + 1);
+        self.weaponMainText = self.add.text(0,0,"MAIN", {fontFamily:"system-ui, sans-serif",fontSize:"13px",fill:"#e8eefc",stroke:"#000",strokeThickness:3}).setScrollFactor(0).setDepth(hudDepth + 1);
+        self.weaponSubText = self.add.text(0,0,"SUB", {fontFamily:"system-ui, sans-serif",fontSize:"13px",fill:"#e8eefc",stroke:"#000",strokeThickness:3}).setScrollFactor(0).setDepth(hudDepth + 1);
+        self.weaponG = self.add.graphics().setScrollFactor(0).setDepth(hudDepth + 1);
+        self.weaponGroup = self.add.container(0,0,[self.weaponG, self.weaponMainText, self.weaponSubText]).setScrollFactor(0).setDepth(hudDepth + 1);
 
 
         // HUD + bars
