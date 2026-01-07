@@ -1,30 +1,30 @@
-# programmed-to-survive
+﻿# programmed-to-survive
 
-## GitHub Pages 配信
+Minimal Phaser hello world for a portrait-first browser game.
 
-### 本番URL
-- `master` 反映先: `https://<owner>.github.io/<repo>/`
+## Quick Start
+- `npm ci`
+- `npm run dev`
+- Open: `http://127.0.0.1:5173/`
 
-### ブランチプレビューURL
-- `master` 以外のブランチに push すると、`gh-pages` ブランチの `/<SAFE_BRANCH>/` にデプロイされます。
-- プレビューURL: `https://<owner>.github.io/<repo>/<SAFE_BRANCH>/`
+## Build
+- `./scripts/build.sh`
+- Output: `public/`
 
-### SAFE_BRANCH ルール
-- 変換元: `GITHUB_REF_NAME`
-- `/` `:` `@` 空白 などは `-` に置換
-- それ以外の記号も `-` へ置換し、英数字・`._-` のみ許可
+## Constraints
+- Edit only `src/` (do not edit `public/` directly)
+- Phaser is loaded via CDN
+- Use relative paths only
+- Portrait-first layout (9:16)
 
-### スマホでの確認フロー
-1. 対象ブランチへ push し、GitHub Actions の「Deploy GitHub Pages (branch preview)」が成功していることを確認
-2. PR コメントの Preview URL をスマホで開く
-3. 画面が縦向きの状態で以下を確認
-   - ゲームが起動する
-   - タップ/クリックが反応する
-   - UI が崩れない
-   - 60秒放置しても落ちない
-   - 致命的な console error が出ていない
+## GitHub Pages
+- Master: `https://<owner>.github.io/<repo>/`
+- Branch preview: `https://<owner>.github.io/<repo>/<SAFE_BRANCH>/`
 
-## 開発メモ
-- 配信対象は `public/` ディレクトリ
-- ソースは `src/` にあり、`./scripts/build.sh` で `public/` を生成します（`public/` はコミット対象外）
-- Phaser は CDN から読み込むため、絶対パス（例: `/assets/...`）は使用せず、相対パスで参照してください
+## Verification Checklist
+- Build succeeds (`./scripts/build.sh`)
+- Bouncing ball is visible on launch
+- Mobile portrait layout looks correct
+
+## Node Version
+- Vite requires Node 18+.

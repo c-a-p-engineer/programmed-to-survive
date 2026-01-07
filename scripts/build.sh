@@ -3,10 +3,6 @@ set -euo pipefail
 
 npm run build
 
-# Ensure UI folder is available in build output (for workflow checks and previews)
-mkdir -p public/ui
-rsync -a --delete src/ui/ public/ui/
-
 # Normalize hashed main bundle to public/assets/main.js for workflow checks
 mkdir -p public/assets
 MAIN_BUNDLE=$(ls public/assets/main-*.js 2>/dev/null | head -n 1 || true)

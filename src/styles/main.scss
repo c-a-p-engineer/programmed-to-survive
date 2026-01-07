@@ -1,260 +1,28 @@
-@use "sass:color";
-
-$bg: #05070b;
-$text: #e8eefc;
-$muted: rgba(232, 238, 252, 0.8);
-$panel-bg: rgba(5, 7, 11, 0.86);
-$panel-border: rgba(232, 238, 252, 0.14);
-$accent: #00ffcc;
-$shadow: rgba(0, 0, 0, 0.35);
-
-$radius-lg: 16px;
-$radius-xl: 20px;
-$gap-sm: 10px;
-$gap-md: 12px;
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 
 html,
 body {
+  width: 100%;
+  height: 100%;
   margin: 0;
-  padding: 0;
-  background: $bg;
-  color: $text;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  overflow: hidden;
+  font-family: "Trebuchet MS", sans-serif;
+  background: radial-gradient(circle at top, #222016, #0a0907);
+  color: #f7f5f0;
 }
 
-#wrap {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  align-items: stretch;
-  justify-content: center;
+body {
+  margin: 0;
 }
 
-#game {
-  flex: 1;
-  max-width: 520px;
-  position: relative;
+#game-root {
+  width: 100vw;
+  height: 100vh;
 }
 
 canvas {
   display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.panel {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  gap: $gap-md;
-  padding: 16px;
-  background: linear-gradient(180deg, $panel-bg, rgba(5, 7, 11, 0.72));
-  backdrop-filter: blur(6px);
-}
-
-.hidden {
-  display: block;
-}
-
-h1 {
-  margin: 0;
-  font-size: 20px;
-  letter-spacing: 0.04em;
-}
-
-.sub {
-  opacity: 0.8;
-  font-size: 12px;
-  line-height: 1.4;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: $gap-sm;
-}
-
-.row {
-  display: flex;
-  gap: $gap-sm;
-}
-
-label {
-  font-size: 12px;
-  opacity: 0.9;
-}
-
-select,
-button {
-  width: 100%;
-  padding: 12px;
-  background: #0b1220;
-  border: 1px solid $panel-border;
-  color: $text;
-  border-radius: $radius-lg;
-  font-size: 14px;
-  outline: none;
-}
-
-button {
-  background: #0d1b2e;
-  border-color: rgba($accent, 0.35);
-
-  &:active {
-    transform: translateY(1px);
-  }
-}
-
-.tiny {
-  font-size: 11px;
-  opacity: 0.7;
-}
-
-.kpi {
-  display: flex;
-  gap: $gap-sm;
-  flex-wrap: wrap;
-}
-
-.pill {
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: rgba(232, 238, 252, 0.08);
-  border: 1px solid rgba(232, 238, 252, 0.1);
-  font-size: 12px;
-}
-
-.good {
-  border-color: rgba($accent, 0.35);
-  background: rgba($accent, 0.08);
-}
-
-.bad {
-  border-color: rgba(255, 79, 216, 0.28);
-  background: rgba(255, 79, 216, 0.08);
-}
-
-#toast {
-  position: absolute;
-  left: 12px;
-  right: 12px;
-  bottom: 12px;
-  padding: 10px 12px;
-  border-radius: $radius-lg;
-  background: rgba(0, 0, 0, 0.55);
-  border: 1px solid $panel-border;
-  font-size: 12px;
-  opacity: 0.92;
-  pointer-events: none;
-}
-
-#debugBtn {
-  position: absolute;
-  right: 12px;
-  top: 12px;
-  z-index: 20;
-  padding: 8px 10px;
-  border-radius: 10px;
-  background: #1a2235;
-  color: $text;
-  border: 1px solid rgba(232, 238, 252, 0.25);
-  font-size: 12px;
-  display: none;
-}
-
-body.is-debug {
-  #debugBtn {
-    display: block;
-  }
-}
-
-#debugPanel {
-  position: absolute;
-  left: 12px;
-  right: 12px;
-  bottom: 12px;
-  max-height: 40%;
-  overflow: auto;
-  z-index: 20;
-  background: rgba(0, 0, 0, 0.65);
-  border: 1px solid rgba(232, 238, 252, 0.2);
-  border-radius: $radius-lg;
-  padding: 8px;
-  font-size: 11px;
-  display: none;
-  white-space: pre-wrap;
-}
-
-#mechLogPanel {
-  position: absolute;
-  right: 6px;
-  bottom: clamp(140px, 20vh, 220px);
-  width: clamp(170px, 26vw, 220px);
-  max-height: clamp(84px, 14vh, 128px);
-  min-height: 84px;
-  overflow: hidden;
-  z-index: 25;
-  pointer-events: none;
-  visibility: hidden;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-  font-size: 10px;
-  line-height: 1.25;
-  color: $text;
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(232, 238, 252, 0.18);
-  border-radius: $radius-lg;
-  padding: 8px 10px;
-  box-shadow: 0 6px 18px $shadow;
-  backdrop-filter: blur(6px);
-  display: none;
-  opacity: 0.35;
-  transition: opacity 200ms ease-out;
-
-  .t {
-    opacity: 0.8;
-    margin-bottom: 6px;
-    letter-spacing: 0.08em;
-  }
-
-  .line {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .line.placeholder {
-    opacity: 0.35;
-  }
-
-  .line.is-old {
-    opacity: 0.55;
-  }
-
-  .line.is-latest {
-    opacity: 1;
-    font-weight: 700;
-    color: #ffffff;
-  }
-
-  .c-sys {
-    color: #b8c6ff;
-  }
-
-  .c-lock {
-    color: $accent;
-  }
-
-  .c-kill {
-    color: #7cff8a;
-  }
-
-  .c-obj {
-    color: #ffd36b;
-  }
-
-  .c-dmg {
-    color: #ff6b6b;
-  }
 }
